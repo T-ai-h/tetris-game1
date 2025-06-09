@@ -14,10 +14,18 @@
     color: white;
     font-family: sans-serif;
   }
-  canvas {
+  canvas#game {
+    width: 100vw;
+    max-width: 300px;
+    aspect-ratio: 1 / 2;
+    height: auto;
     background: #000;
     display: block;
     margin: 20px auto;
+  }
+  canvas#next {
+    width: 100px;
+    height: 100px;
   }
   #controls {
     display: flex;
@@ -26,8 +34,9 @@
     margin-bottom: 20px;
   }
   button {
-    width: 60px; height: 60px;
-    font-size: 20px;
+    width: 20vw; height: 20vw;
+    max-width: 80px; max-height: 80px;
+    font-size: 5vw;
     border-radius: 10px;
     border: none;
     background: #555;
@@ -50,11 +59,16 @@
     z-index: 10;
     flex-direction: column;
   }
+  #info {
+    margin-bottom: 20px;
+    font-size: 18px;
+    text-align: center;
+  }
 </style>
 </head>
 <body>
 
-<canvas id="game" width="300" height="600"></canvas>
+<canvas id="game"></canvas>
 <canvas id="next" width="120" height="120"></canvas>
 
 <div id="controls">
@@ -69,7 +83,7 @@
   <button id="restartBtn">Restart</button>
 </div>
 
-<div>Score: <span id="score">0</span> | Level: <span id="level">1</span></div>
+<div id="info">Score: <span id="score">0</span> | Level: <span id="level">1</span></div>
 
 <script>
 const canvas = document.getElementById("game");
@@ -80,7 +94,7 @@ const nextCtx = nextCanvas.getContext("2d");
 
 const ROWS = 20;
 const COLS = 10;
-const BLOCK_SIZE = 30;
+let BLOCK_SIZE = 30;
 const NEXT_BLOCK_SIZE = 30;
 
 let score = 0;
@@ -93,24 +107,19 @@ const restartBtn = document.getElementById("restartBtn");
 
 const colors = [
   null,
-  "#00f0f0", // I
-  "#0000f0", // J
-  "#f0a000", // L
-  "#f0f000", // O
-  "#00f000", // S
-  "#a000f0", // T
-  "#f00000", // Z
+  "#00f0f0", "#0000f0", "#f0a000", "#f0f000",
+  "#00f000", "#a000f0", "#f00000",
 ];
 
 const tetrominoes = [
   [],
-  [[1, 1, 1, 1]],                // I
-  [[2, 0, 0], [2, 2, 2]],        // J
-  [[0, 0, 3], [3, 3, 3]],        // L
-  [[4, 4], [4, 4]],              // O
-  [[0, 5, 5], [5, 5, 0]],        // S
-  [[0, 6, 0], [6, 6, 6]],        // T
-  [[7, 7, 0], [0, 7, 7]],        // Z
+  [[1, 1, 1, 1]],
+  [[2, 0, 0], [2, 2, 2]],
+  [[0, 0, 3], [3, 3, 3]],
+  [[4, 4], [4, 4]],
+  [[0, 5, 5], [5, 5, 0]],
+  [[0, 6, 0], [6, 6, 6]],
+  [[7, 7, 0], [0, 7, 7]],
 ];
 
 let grid = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
@@ -133,6 +142,14 @@ function randomPiece() {
   return { id: id, shape: tetrominoes[id] };
 }
 
+function resizeCanvas() {
+  const width = canvas.clientWidth;
+  const height = canvas.clientHeight;
+  canvas.width = width;
+  canvas.height = height;
+  BLOCK_SIZE = width / COLS;
+}
+
 function drawBlock(x, y, colorId, size = BLOCK_SIZE, context = ctx) {
   context.fillStyle = colors[colorId];
   context.fillRect(x * size, y * size, size, size);
@@ -145,9 +162,7 @@ function drawGrid() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
-      if (grid[r][c]) {
-        drawBlock(c, r, grid[r][c]);
-      }
+      if (grid[r][c]) drawBlock(c, r, grid[r][c]);
     }
   }
 }
@@ -185,9 +200,7 @@ function validMove(piece, x, y) {
 function lockPiece(piece, x, y) {
   piece.shape.forEach((row, r) => {
     row.forEach((val, c) => {
-      if (val && y + r >= 0) {
-        grid[y + r][x + c] = piece.id;
-      }
+      if (val && y + r >= 0) grid[y + r][x + c] = piece.id;
     });
   });
 }
@@ -214,7 +227,6 @@ function rotate(piece) {
   const oldShape = piece.shape;
   const rows = oldShape.length;
   const cols = oldShape[0].length;
-
   let newShape = [];
   for (let x = 0; x < cols; x++) {
     newShape[x] = [];
@@ -222,7 +234,6 @@ function rotate(piece) {
       newShape[x][rows - 1 - y] = oldShape[y][x];
     }
   }
-
   return newShape;
 }
 
@@ -232,9 +243,7 @@ function resetPiece() {
   drawNextPiece();
   currentX = Math.floor(COLS / 2) - Math.floor(currentPiece.shape[0].length / 2);
   currentY = -1;
-  if (!validMove(currentPiece, currentX, currentY)) {
-    gameOver();
-  }
+  if (!validMove(currentPiece, currentX, currentY)) gameOver();
 }
 
 function gameOver() {
@@ -244,13 +253,10 @@ function gameOver() {
 
 restartBtn.addEventListener("click", () => {
   gameOverlay.style.display = "none";
-
   grid = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
-  score = 0;
-  level = 1;
+  score = 0; level = 1;
   scoreEl.textContent = score;
   levelEl.textContent = level;
-
   nextPiece = randomPiece();
   resetPiece();
   updateSpeed();
@@ -259,15 +265,11 @@ restartBtn.addEventListener("click", () => {
 
 let uiMoveInterval = null;
 
-// สำหรับปุ่มกดค้าง (กดซ้าย ขวา และลง)
 function startContinuousMove(direction) {
   if (gameOverlay.style.display === "flex") return;
   if (uiMoveInterval) return;
-
   handleMove(direction);
-  uiMoveInterval = setInterval(() => {
-    handleMove(direction);
-  }, 150);
+  uiMoveInterval = setInterval(() => handleMove(direction), 150);
 }
 
 function stopContinuousMove() {
@@ -277,7 +279,6 @@ function stopContinuousMove() {
   }
 }
 
-// ปุ่มซ้าย ขวา กดค้างได้ (mousedown/touchstart)
 leftBtn.addEventListener("mousedown", () => startContinuousMove("left"));
 leftBtn.addEventListener("touchstart", (e) => { e.preventDefault(); startContinuousMove("left"); });
 leftBtn.addEventListener("mouseup", stopContinuousMove);
@@ -285,7 +286,6 @@ leftBtn.addEventListener("mouseleave", stopContinuousMove);
 leftBtn.addEventListener("touchend", stopContinuousMove);
 leftBtn.addEventListener("touchcancel", stopContinuousMove);
 
-// ปุ่มขวา กดค้างได้
 rightBtn.addEventListener("mousedown", () => startContinuousMove("right"));
 rightBtn.addEventListener("touchstart", (e) => { e.preventDefault(); startContinuousMove("right"); });
 rightBtn.addEventListener("mouseup", stopContinuousMove);
@@ -293,7 +293,6 @@ rightBtn.addEventListener("mouseleave", stopContinuousMove);
 rightBtn.addEventListener("touchend", stopContinuousMove);
 rightBtn.addEventListener("touchcancel", stopContinuousMove);
 
-// ปุ่มลง กดค้างได้ (เหมือนข้างบน)
 downBtn.addEventListener("mousedown", () => startContinuousMove("down"));
 downBtn.addEventListener("touchstart", (e) => { e.preventDefault(); startContinuousMove("down"); });
 downBtn.addEventListener("mouseup", stopContinuousMove);
@@ -301,41 +300,27 @@ downBtn.addEventListener("mouseleave", stopContinuousMove);
 downBtn.addEventListener("touchend", stopContinuousMove);
 downBtn.addEventListener("touchcancel", stopContinuousMove);
 
-// ปุ่มหมุนบล็อก (click หรือ touch)
 rotateBtn.addEventListener("click", () => handleMove("rotate"));
 rotateBtn.addEventListener("touchstart", (e) => { e.preventDefault(); handleMove("rotate"); });
 
 function handleMove(direction) {
   if (gameOverlay.style.display === "flex") return;
-
-  if (direction === "left") {
-    if (validMove(currentPiece, currentX - 1, currentY)) currentX--;
-  } else if (direction === "right") {
-    if (validMove(currentPiece, currentX + 1, currentY)) currentX++;
-  } else if (direction === "down") {
-    update();  // เลื่อนชิ้นส่วนลงและจัดการล็อกชิ้นส่วนอัตโนมัติ
-    return;     // ออกจากฟังก์ชันเลยเพื่อไม่ให้ draw() ซ้ำ
-  } else if (direction === "rotate") {
-    const rotatedShape = rotate(currentPiece);
-    const testPiece = { ...currentPiece, shape: rotatedShape };
-
-    if (validMove(testPiece, currentX, currentY)) {
-      currentPiece.shape = rotatedShape;
-    } else if (validMove(testPiece, currentX - 1, currentY)) {
-      currentX--;
-      currentPiece.shape = rotatedShape;
-    } else if (validMove(testPiece, currentX + 1, currentY)) {
-      currentX++;
-      currentPiece.shape = rotatedShape;
-    }
+  if (direction === "left" && validMove(currentPiece, currentX - 1, currentY)) currentX--;
+  else if (direction === "right" && validMove(currentPiece, currentX + 1, currentY)) currentX++;
+  else if (direction === "down") { update(); return; }
+  else if (direction === "rotate") {
+    const rotated = rotate(currentPiece);
+    const test = { ...currentPiece, shape: rotated };
+    if (validMove(test, currentX, currentY)) currentPiece.shape = rotated;
+    else if (validMove(test, currentX - 1, currentY)) { currentX--; currentPiece.shape = rotated; }
+    else if (validMove(test, currentX + 1, currentY)) { currentX++; currentPiece.shape = rotated; }
   }
   draw();
 }
 
 function update() {
-  if (validMove(currentPiece, currentX, currentY + 1)) {
-    currentY++;
-  } else {
+  if (validMove(currentPiece, currentX, currentY + 1)) currentY++;
+  else {
     lockPiece(currentPiece, currentX, currentY);
     clearLines();
     resetPiece();
@@ -351,35 +336,28 @@ function draw() {
 function updateSpeed() {
   level = Math.floor(score / 50) + 1;
   levelEl.textContent = level;
-
   dropSpeed = Math.max(100, 700 - (level - 1) * 50);
   clearInterval(gameInterval);
   gameInterval = setInterval(update, dropSpeed);
-
   updateBackground();
 }
 
 function updateBackground() {
-  const backgrounds = [
-    "#000000",
-    "#0b3d0b",
-    "#3d3d00",
-    "#3d2200",
-    "#4d003d",
-    "#2e1b4d",
-    "#004d66",
-  ];
-
-  let bgColor = backgrounds[Math.min(level - 1, backgrounds.length - 1)];
-  canvas.style.background = bgColor;
+  const backgrounds = ["#000", "#0b3d0b", "#3d3d00", "#3d2200", "#4d003d", "#2e1b4d", "#004d66"];
+  let bg = backgrounds[Math.min(level - 1, backgrounds.length - 1)];
+  canvas.style.background = bg;
 }
 
-// เริ่มเกม
+window.addEventListener('resize', () => {
+  resizeCanvas();
+  draw();
+});
+
 nextPiece = randomPiece();
+resizeCanvas();
 resetPiece();
 updateSpeed();
 draw();
-
 </script>
 </body>
 </html>

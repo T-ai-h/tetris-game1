@@ -35,6 +35,7 @@
     height: 100px;
   }
   #controls {
+  touch-action: none;  /* ปิด gesture พวก scroll/pinch */
     display: flex;
     justify-content: center;
     gap: 10px;
@@ -93,6 +94,11 @@
 <div id="info">Score: <span id="score">0</span> | Level: <span id="level">1</span></div>
 
 <script>
+  const controls = document.getElementById("controls");
+controls.addEventListener("touchmove", function(e) {
+  e.preventDefault();  // ป้องกันเลื่อนหน้าเมื่อสัมผัสในโซนปุ่ม
+}, { passive: false });
+
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 

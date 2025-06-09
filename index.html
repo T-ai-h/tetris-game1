@@ -68,6 +68,20 @@ button:active {
     width: 100px;
     height: 100px;
   }
+  #info {
+  position: fixed;
+  top: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.6);
+  padding: 5px 15px;
+  border-radius: 10px;
+  z-index: 101;
+  font-size: 16px;
+  color: white;
+  text-align: center;
+}
+
   #controls {
   touch-action: none;  /* ปิด gesture พวก scroll/pinch */
     display: flex;
@@ -101,15 +115,11 @@ button:active {
     z-index: 10;
     flex-direction: column;
   }
-  #info {
-    margin-bottom: 20px;
-    font-size: 18px;
-    text-align: center;
-  }
+  
 </style>
 </head>
 <body>
-
+<div id="info">Score: <span id="score">0</span> | Level: <span id="level">1</span></div>
 <canvas id="game"></canvas>
 <canvas id="next" width="120" height="120"></canvas>
 

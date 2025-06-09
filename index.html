@@ -210,13 +210,12 @@ function randomPiece() {
   return { id: id, shape: tetrominoes[id] };
 }
 function resizeCanvas() {
-  const width = window.innerWidth; // ใช้ความกว้างเต็มหน้าจอ
-  const height = width * 1.5;      // รักษาสัดส่วน 1:1.5
-
+  const width = canvas.clientWidth;
+  const height = canvas.clientHeight;
   canvas.width = width;
   canvas.height = height;
 
-  BLOCK_SIZE = width / COLS; // ขนาดบล็อกเท่ากับความกว้างหารด้วยจำนวนคอลัมน์
+  BLOCK_SIZE = width / COLS;  // ลบ * 0.75 ออก เพื่อให้บล็อกพอดีกับ canvas
 }
 
 

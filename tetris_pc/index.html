@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Falling Block Game</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      background: #111;
+      color: #eee;
+      user-select: none;
+      margin: 0;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #game-container {
+      display: flex;
+      gap: 20px;
+    }
+
+    #next {
+      border: 2px solid #333;
+      background: #222;
+      display: block;
+      margin-top: 10px;
+    }
+
+    #game {
+      background: #222;
+      border: 2px solid #333;
+      display: block;
+    }
+
+    #gameOverlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.6);
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+    }
+
+    #gameOver {
+      font-size: 32px;
+      color: red;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    #restartBtn {
+      padding: 12px 24px;
+      font-size: 18px;
+      background-color: #f44336;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 8px;
+    }
+
+    #restartBtn:hover {
+      background-color: #d32f2f;
+    }
+  </style>
+</head>
+<body>
+  <h2>
+    Score: <span id="score">0</span> |
+    Level: <span id="level">1</span>
+  </h2>
+
+  <div id="game-container">
+    <canvas id="game" width="300" height="600"></canvas>
+
+    <div>
+      <h3>Next</h3>
+      <canvas id="next" width="120" height="120"></canvas>
+    </div>
+  </div>
+
+  <div id="gameOverlay">
+    <div id="gameOver">Game Over</div>
+    <button id="restartBtn">เริ่มใหม่</button>
+  </div>
+
+  <div id="controls">
+    <button id="leftBtn">◀️</button>
+    <button id="downBtn">⬇️</button>
+    <button id="rightBtn">▶️</button>
+    <button id="rotateBtn">⤴️</button>
+  </div>
+  
+  <style>
+    #controls {
+      margin-top: 12px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+    #controls button {
+      font-size: 24px;
+      padding: 10px 16px;
+      border-radius: 6px;
+      border: none;
+      background-color: #444;
+      color: white;
+      user-select: none;
+    }
+    #controls button:active {
+      background-color: #888;
+    }
+  </style>
+  
+  <script src="game.js"></script>
+</body>
+</html>

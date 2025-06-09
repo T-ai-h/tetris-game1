@@ -5,6 +5,30 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Tetris Mobile Friendly</title>
 <style>
+  button {
+  width: 22vw;          /* กว้างประมาณ 22% ของหน้าจอ */
+  max-width: 70px;      /* จำกัดขนาดสูงสุด */
+  height: 22vw;         /* สูงเท่ากับความกว้าง */
+  max-height: 70px;     /* จำกัดขนาดสูงสุด */
+  font-size: 5vw;
+  border-radius: 10px;
+  border: none;
+  background: #555;
+  color: white;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+  #controls {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;      /* ให้ปุ่มขึ้นบรรทัดใหม่ได้ */
+  max-width: 100vw;     /* จำกัดความกว้างไม่เกินหน้าจอ */
+  padding: 0 10px;      /* เว้นขอบซ้ายขวานิดหน่อย */
+  box-sizing: border-box; /* รวม padding ในขนาด */
+}
   /* ปิด scroll */
   html, body {
     margin: 0; padding: 0;

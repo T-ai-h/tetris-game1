@@ -214,8 +214,7 @@ function resizeCanvas() {
   const height = canvas.clientHeight;
   canvas.width = width;
   canvas.height = height;
-
-  BLOCK_SIZE = width / COLS;  // ลบ * 0.75 ออก เพื่อให้บล็อกพอดีกับ canvas
+  BLOCK_SIZE = width / COLS * 0.75;  // ลด block size ลง 75% ตัวอย่าง
 }
 
 
@@ -412,10 +411,23 @@ function updateSpeed() {
 }
 
 function updateBackground() {
-  const backgrounds = ["#000", "#0b3d0b", "#3d3d00", "#3d2200", "#4d003d", "#2e1b4d", "#004d66"];
-  let bg = backgrounds[Math.min(level - 1, backgrounds.length - 1)];
+  const backgrounds = [
+    "linear-gradient(135deg, #000000, #1a1a1a)",   // level 1: ดำเรียบ
+    "linear-gradient(135deg, #004d4d, #009999)",   // level 2: เขียวฟ้า
+    "linear-gradient(135deg, #00264d, #0059b3)",   // level 3: น้ำเงินเข้ม
+    "linear-gradient(135deg, #33001a, #660033)",   // level 4: ม่วงแดง
+    "linear-gradient(135deg, #331a00, #cc6600)",   // level 5: น้ำตาลส้ม
+    "linear-gradient(135deg, #1a3300, #66cc00)",   // level 6: เขียวสด
+    "linear-gradient(135deg, #4d004d, #990099)",   // level 7: ม่วงเจิดจ้า
+    "linear-gradient(135deg, #003333, #00cccc)",   // level 8: ฟ้าน้ำทะเล
+    "linear-gradient(135deg, #26004d, #9933ff)",   // level 9: ม่วงนีออน
+    "linear-gradient(135deg, #0d0d0d, #333333)"    // level 10+: เทาเข้มคลาสสิก
+  ];
+  
+  const bg = backgrounds[Math.min(level - 1, backgrounds.length - 1)];
   canvas.style.background = bg;
 }
+
 
 window.addEventListener('resize', () => {
   resizeCanvas();

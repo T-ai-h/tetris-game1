@@ -66,14 +66,14 @@ button:active {
   }
  canvas#game {
   width: 100vw;
-  max-width: 300px;
-  /* ลด aspect ratio ให้แถวเกมไม่สูงเกินไป */
-  aspect-ratio: 1 / 1.5; /* เดิม 1 / 2 */
+  /* ลบ max-width ออก */
+  aspect-ratio: 1 / 1.5; /* หรือปรับตามชอบ */
   height: auto;
   background: #000;
   display: block;
   margin: 20px auto;
 }
+
 
   canvas#next {
     width: 100px;
@@ -210,11 +210,13 @@ function randomPiece() {
   return { id: id, shape: tetrominoes[id] };
 }
 function resizeCanvas() {
-  const width = canvas.clientWidth;
-  const height = canvas.clientHeight;
+  const width = window.innerWidth; // ใช้ความกว้างเต็มหน้าจอ
+  const height = width * 1.5;      // รักษาสัดส่วน 1:1.5
+
   canvas.width = width;
   canvas.height = height;
-  BLOCK_SIZE = width / COLS * 0.75;  // ลด block size ลง 75% ตัวอย่าง
+
+  BLOCK_SIZE = width / COLS; // ขนาดบล็อกเท่ากับความกว้างหารด้วยจำนวนคอลัมน์
 }
 
 

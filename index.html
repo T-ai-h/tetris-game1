@@ -1,112 +1,114 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Tetris Mobile Friendly</title>
-  <style>
-    html, body {
-      margin: 0; padding: 0;
-      height: 100%;
-    }
-    body {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      background: #222;
-      color: white;
-      font-family: sans-serif;
-    }
-    canvas#game {
-      width: 100vw;
-      max-width: 300px;
-      aspect-ratio: 1 / 1.5;
-      height: auto;
-      background: #000;
-      display: block;
-      margin: 20px auto;
-    }
-    canvas#next {
-      width: 100px;
-      height: 100px;
-    }
-    #controls {
-      position: fixed;
-      bottom: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      background: rgba(0,0,0,0.6);
-      padding: 5px 10px;
-      border-radius: 10px;
-      z-index: 100;
-      max-width: 100vw;
-      flex-wrap: nowrap;
-      touch-action: none;
-    }
-    button {
-      width: 20vw; height: 20vw;
-      max-width: 80px; max-height: 80px;
-      font-size: 5vw;
-      border-radius: 10px;
-      border: none;
-      background: #555;
-      color: white;
-      user-select: none;
-      touch-action: manipulation;
-    }
-    button:active {
-      background: #999;
-    }
-    #gameOverlay {
-      position: fixed;
-      top:0; left:0; right:0; bottom:0;
-      background: rgba(0,0,0,0.8);
-      color: white;
-      font-size: 24px;
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 10;
-      flex-direction: column;
-    }
-   #info {
-  margin-top: 10px;
-  font-size: 18px;
-  text-align: center;
-  z-index: 50;
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tetris Mobile Friendly</title>
+<style>
+ button {
+  width: 50px;
+  height: 50px;
+  font-size: 24px;
+  border-radius: 10px;
+  border: none;
+  background: #555;
+  color: white;
+  user-select: none;
+  touch-action: manipulation;
+}
+button:active {
+  background: #999;
 }
 
-  </style>
+
+ #controls {
+  position: fixed;
+  bottom: 10px;      /* ปรับระยะจากล่างจอ */
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  background: rgba(0,0,0,0.6); /* เพิ่มพื้นหลังเล็กน้อยเพื่อให้เห็นปุ่ม */
+  padding: 5px 10px;
+  border-radius: 10px;
+  z-index: 100;
+  max-width: 100vw;
+  flex-wrap: nowrap; /* หรือ wrap ถ้าปุ่มเยอะ */
+}
+
+  /* ปิด scroll */
+  html, body {
+    margin: 0; padding: 0;
+    overflow: hidden;
+    height: 100%;
+  }
+
+  body {
+    margin: 0; padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #222;
+    color: white;
+    font-family: sans-serif;
+  }
+ canvas#game {
+  width: 100vw;
+  max-width: 300px;
+  /* ลด aspect ratio ให้แถวเกมไม่สูงเกินไป */
+  aspect-ratio: 1 / 1.5; /* เดิม 1 / 2 */
+  height: auto;
+  background: #000;
+  display: block;
+  margin: 20px auto;
+}
+
+  canvas#next {
+    width: 100px;
+    height: 100px;
+  }
+  #controls {
+  touch-action: none;  /* ปิด gesture พวก scroll/pinch */
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  button {
+    width: 20vw; height: 20vw;
+    max-width: 80px; max-height: 80px;
+    font-size: 5vw;
+    border-radius: 10px;
+    border: none;
+    background: #555;
+    color: white;
+    user-select: none;
+    touch-action: manipulation;
+  }
+  button:active {
+    background: #999;
+  }
+  #gameOverlay {
+    position: fixed;
+    top:0; left:0; right:0; bottom:0;
+    background: rgba(0,0,0,0.8);
+    color: white;
+    font-size: 24px;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    flex-direction: column;
+  }
+  #info {
+    margin-bottom: 20px;
+    font-size: 18px;
+    text-align: center;
+  }
+</style>
 </head>
 <body>
-  <canvas id="game"></canvas>
-  <canvas id="next" width="120" height="120"></canvas>
-
-  <div id="controls">
-    <button id="leftBtn">◀️</button>
-    <button id="downBtn">⬇️</button>
-    <button id="rightBtn">▶️</button>
-    <button id="rotateBtn">⟳</button>
-  </div>
-
-  <div id="gameOverlay">
-    <div>Game Over</div>
-    <button id="restartBtn">Restart</button>
-  </div>
-
-  <div id="info">Score: <span id="score">0</span> | Level: <span id="level">1</span></div>
-
-  <!-- สคริปต์เกมจะอยู่ตรงนี้ -->
-  <script>
-    // นำโค้ด JavaScript เดิมทั้งหมดมาใส่ตรงนี้ (ตัดเฉพาะ JS ไม่ใช่ HTML/CSS)
-    // เช่น: randomPiece(), resizeCanvas(), draw(), handleMove(), game loop ฯลฯ
-  </script>
-</body>
-</html>
-
 
 <canvas id="game"></canvas>
 <canvas id="next" width="120" height="120"></canvas>

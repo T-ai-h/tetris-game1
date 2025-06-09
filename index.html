@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Tetris Mobile Friendly</title>
 <style>
+  /* ปิด scroll */
+  html, body {
+    margin: 0; padding: 0;
+    overflow: hidden;
+    height: 100%;
+  }
+
   body {
     margin: 0; padding: 0;
     display: flex;
@@ -352,6 +359,11 @@ window.addEventListener('resize', () => {
   resizeCanvas();
   draw();
 });
+
+// ปิด scroll gesture (touchmove)
+document.addEventListener('touchmove', function(e) {
+  e.preventDefault();
+}, { passive: false });
 
 nextPiece = randomPiece();
 resizeCanvas();

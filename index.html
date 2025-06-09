@@ -45,15 +45,17 @@
     color: white;
     font-family: sans-serif;
   }
-  canvas#game {
-    width: 100vw;
-    max-width: 300px;
-    aspect-ratio: 1 / 2;
-    height: auto;
-    background: #000;
-    display: block;
-    margin: 20px auto;
-  }
+ canvas#game {
+  width: 100vw;
+  max-width: 300px;
+  /* ลด aspect ratio ให้แถวเกมไม่สูงเกินไป */
+  aspect-ratio: 1 / 1.5; /* เดิม 1 / 2 */
+  height: auto;
+  background: #000;
+  display: block;
+  margin: 20px auto;
+}
+
   canvas#next {
     width: 100px;
     height: 100px;
@@ -178,14 +180,14 @@ function randomPiece() {
   const id = Math.floor(Math.random() * (tetrominoes.length - 1)) + 1;
   return { id: id, shape: tetrominoes[id] };
 }
-
 function resizeCanvas() {
   const width = canvas.clientWidth;
   const height = canvas.clientHeight;
   canvas.width = width;
   canvas.height = height;
-  BLOCK_SIZE = width / COLS;
+  BLOCK_SIZE = width / COLS * 0.75;  // ลด block size ลง 75% ตัวอย่าง
 }
+
 
 function drawBlock(x, y, colorId, size = BLOCK_SIZE, context = ctx) {
   context.fillStyle = colors[colorId];

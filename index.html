@@ -86,45 +86,164 @@
   <script>
     const canvas = document.getElementById("game");
     const ctx = canvas.getContext("2d");
-    const ROWS = 20;
-    const COLS = 10;
-    const BLOCK_SIZE = 20;
+    const ROWS = 20, COLS = 10, BLOCK_SIZE = 20;
     canvas.width = COLS * BLOCK_SIZE;
     canvas.height = ROWS * BLOCK_SIZE;
 
-    let board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+    const colors = [null, '#00f0f0', '#0000f0', '#f0a000', '#f0f000', '#00f000', '#a000f0', '#f00000'];
 
-    function drawBoard() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      for (let r = 0; r < ROWS; r++) {
-        for (let c = 0; c < COLS; c++) {
-          if (board[r][c]) {
-            ctx.fillStyle = 'cyan';
-            ctx.fillRect(c * BLOCK_SIZE, r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-            ctx.strokeStyle = '#000';
-            ctx.strokeRect(c * BLOCK_SIZE, r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+    const arena = createMatrix(COLS, ROWS);
+    const player = {
+      pos: {x: 0, y: 0},
+      matrix: null,
+      score: 0,
+    };
+
+    const pieces = 'TJLOSZI';
+
+    function createPiece(type) {
+      if (type === 'T') {
+        return [[0, 0, 0],[1, 1, 1],[0, 1, 0]];
+      } else if (type === 'O') {
+        return [[2, 2],[2, 2]];
+      } else if (type === 'L') {
+        return [[0, 3, 0],[0, 3, 0],[0, 3, 3]];
+      } else if (type === 'J') {
+        return [[0, 4, 0],[0, 4, 0],[4, 4, 0]];
+      } else if (type === 'I') {
+        return [[0, 5, 0, 0],[0, 5, 0, 0],[0, 5, 0, 0],[0, 5, 0, 0]];
+      } else if (type === 'S') {
+        return [[0, 6, 6],[6, 6, 0],[0, 0, 0]];
+      } else if (type === 'Z') {
+        return [[7, 7, 0],[0, 7, 7],[0, 0, 0]];
+      }
+    }
+
+    function createMatrix(w, h) {
+      const matrix = [];
+      while (h--) matrix.push(new Array(w).fill(0));
+      return matrix;
+    }
+
+    function merge(arena, player) {
+      player.matrix.forEach((row, y) => {
+        row.forEach((value, x) => {
+          if (value !== 0) arena[y + player.pos.y][x + player.pos.x] = value;
+        });
+      });
+    }
+
+    function collide(arena, player) {
+      const m = player.matrix;
+      const o = player.pos;
+      for (let y = 0; y < m.length; y++) {
+        for (let x = 0; x < m[y].length; x++) {
+          if (m[y][x] !== 0 && (arena[y + o.y] && arena[y + o.y][x + o.x]) !== 0) return true;
+        }
+      }
+      return false;
+    }
+
+    function playerDrop() {
+      player.pos.y++;
+      if (collide(arena, player)) {
+        player.pos.y--;
+        merge(arena, player);
+        playerReset();
+        arenaSweep();
+      }
+      dropCounter = 0;
+    }
+
+    function playerMove(dir) {
+      player.pos.x += dir;
+      if (collide(arena, player)) player.pos.x -= dir;
+    }
+
+    function playerReset() {
+      player.matrix = createPiece(pieces[pieces.length * Math.random() | 0]);
+      player.pos.y = 0;
+      player.pos.x = (COLS / 2 | 0) - (player.matrix[0].length / 2 | 0);
+      if (collide(arena, player)) {
+        arena.forEach(row => row.fill(0));
+        player.score = 0;
+        updateScore();
+      }
+    }
+
+    function playerRotate() {
+      const m = player.matrix;
+      for (let y = 0; y < m.length; y++) {
+        for (let x = 0; x < y; x++) {
+          [m[x][y], m[y][x]] = [m[y][x], m[x][y]];
+        }
+      }
+      m.forEach(row => row.reverse());
+      if (collide(arena, player)) {
+        m.forEach(row => row.reverse());
+        for (let y = 0; y < m.length; y++) {
+          for (let x = 0; x < y; x++) {
+            [m[x][y], m[y][x]] = [m[y][x], m[x][y]];
           }
         }
       }
     }
 
-    // Simple falling block (test)
-    let blockY = 0;
-    function updateGame() {
-      blockY++;
-      if (blockY >= ROWS) blockY = 0;
-      board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
-      board[blockY][4] = 1;
-      drawBoard();
+    function arenaSweep() {
+      outer: for (let y = arena.length - 1; y >= 0; y--) {
+        for (let x = 0; x < arena[y].length; x++) {
+          if (arena[y][x] === 0) continue outer;
+        }
+        arena.splice(y, 1);
+        arena.unshift(new Array(COLS).fill(0));
+        player.score += 10;
+        updateScore();
+      }
     }
 
-    setInterval(updateGame, 500);
+    function drawMatrix(matrix, offset) {
+      matrix.forEach((row, y) => {
+        row.forEach((value, x) => {
+          if (value !== 0) {
+            ctx.fillStyle = colors[value];
+            ctx.fillRect((x + offset.x) * BLOCK_SIZE, (y + offset.y) * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+          }
+        });
+      });
+    }
 
-    // Button event listeners (can be expanded)
-    document.getElementById("leftBtn").addEventListener("touchstart", () => alert("Left"));
-    document.getElementById("rightBtn").addEventListener("touchstart", () => alert("Right"));
-    document.getElementById("downBtn").addEventListener("touchstart", () => alert("Down"));
-    document.getElementById("rotateBtn").addEventListener("touchstart", () => alert("Rotate"));
+    function draw() {
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      drawMatrix(arena, {x: 0, y: 0});
+      drawMatrix(player.matrix, player.pos);
+    }
+
+    let dropCounter = 0;
+    let dropInterval = 1000;
+    let lastTime = 0;
+
+    function update(time = 0) {
+      const deltaTime = time - lastTime;
+      lastTime = time;
+      dropCounter += deltaTime;
+      if (dropCounter > dropInterval) playerDrop();
+      draw();
+      requestAnimationFrame(update);
+    }
+
+    function updateScore() {
+      document.getElementById('score').textContent = player.score;
+    }
+
+    document.getElementById('leftBtn').ontouchstart = () => playerMove(-1);
+    document.getElementById('rightBtn').ontouchstart = () => playerMove(1);
+    document.getElementById('downBtn').ontouchstart = () => playerDrop();
+    document.getElementById('rotateBtn').ontouchstart = () => playerRotate();
+
+    playerReset();
+    updateScore();
+    update();
   </script>
 </body>
 </html>

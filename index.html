@@ -76,9 +76,17 @@ button:active {
 
 
   canvas#next {
-    width: 100px;
-    height: 100px;
-  }
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  width: 90px;
+  height: 90px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 2px solid white;
+  border-radius: 10px;
+  z-index: 101;
+}
+
   #info {
   position: fixed;
   top: 5px;
@@ -130,9 +138,11 @@ button:active {
 </style>
 </head>
 <body>
+  <div id="info">Score: <span id="score">0</span> | Level: <span id="level">1</span></div>
+<!-- ใส่ next ไว้ใกล้ info -->
 <div id="info">Score: <span id="score">0</span> | Level: <span id="level">1</span></div>
-<canvas id="game"></canvas>
 <canvas id="next" width="120" height="120"></canvas>
+<canvas id="game"></canvas>
 
 <div id="controls">
   <button id="leftBtn">◀️</button>
@@ -145,8 +155,6 @@ button:active {
   <div>Game Over</div>
   <button id="restartBtn">Restart</button>
 </div>
-
-<div id="info">Score: <span id="score">0</span> | Level: <span id="level">1</span></div>
 
 <script>
   const controls = document.getElementById("controls");

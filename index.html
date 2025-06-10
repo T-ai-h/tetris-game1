@@ -1,18 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Tetris Game (Mobile)</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tetris Mobile</title>
   <style>
     html, body {
       margin: 0; padding: 0;
       width: 100%; height: 100%;
-      overflow: hidden;
       background: #000;
       font-family: sans-serif;
       color: white;
-      user-select: none;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -27,30 +25,24 @@
     }
 
     #mainArea {
-      flex: 1;
       display: flex;
       flex-direction: row;
-      width: 100%;
-      box-sizing: border-box;
       justify-content: center;
       align-items: center;
       gap: 10px;
-      padding: 5px;
+      flex: 1;
     }
 
     #game {
       background: #222;
       border: 2px solid #555;
-      image-rendering: pixelated;
     }
 
     #controls {
       display: flex;
       flex-direction: column;
       gap: 10px;
-      justify-content: center;
       align-items: center;
-      flex-wrap: wrap;
     }
 
     #controls button {
@@ -61,75 +53,27 @@
       color: white;
       border-radius: 5px;
       cursor: pointer;
-      user-select: none;
-      transition: background-color 0.2s ease;
       width: 20vw;
       max-width: 70px;
     }
 
-    #controls button:hover {
-      background: #555;
-    }
-
-    #next {
-      display: none; /* ไม่แสดงในมือถือ */
-    }
-
-    #gameOverlay {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.8);
-      display: none;
-      color: white;
-      font-size: 2em;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      z-index: 10;
-    }
-
-    #restartBtn {
-      margin-top: 20px;
-      padding: 10px 25px;
-      font-size: 1.2em;
-      border: none;
-      background: #008800;
-      color: white;
-      border-radius: 6px;
-      cursor: pointer;
-      user-select: none;
-      transition: background-color 0.3s ease;
-    }
-    #restartBtn:hover {
-      background: #00bb00;
-    }
-
     @media (max-width: 600px) {
-      #controls {
-        flex-direction: column;
-        gap: 10px;
-      }
-
       #controls button {
         width: 22vw;
-        max-width: 65px;
         font-size: 1.4em;
-        padding: 8px 10px;
+        padding: 8px;
       }
     }
   </style>
 </head>
 <body>
-
-  <!-- HUD ด้านบน -->
   <div id="hud">
     <div>Score: <span id="score">0</span></div>
     <div>Level: <span id="level">1</span></div>
   </div>
 
-  <!-- Main Layout -->
   <div id="mainArea">
-    <canvas id="game" width="300" height="600"></canvas>
+    <canvas id="game" width="200" height="400"></canvas>
 
     <div id="controls">
       <button id="leftBtn">◀️</button>
@@ -139,12 +83,48 @@
     </div>
   </div>
 
-  <!-- Overlay เมื่อจบเกม -->
-  <div id="gameOverlay">
-    <div>Game Over</div>
-    <button id="restartBtn">Restart</button>
-  </div>
+  <script>
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+    const ROWS = 20;
+    const COLS = 10;
+    const BLOCK_SIZE = 20;
+    canvas.width = COLS * BLOCK_SIZE;
+    canvas.height = ROWS * BLOCK_SIZE;
 
-  <script src="game.js"></script>
+    let board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+
+    function drawBoard() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          if (board[r][c]) {
+            ctx.fillStyle = 'cyan';
+            ctx.fillRect(c * BLOCK_SIZE, r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+            ctx.strokeStyle = '#000';
+            ctx.strokeRect(c * BLOCK_SIZE, r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+          }
+        }
+      }
+    }
+
+    // Simple falling block (test)
+    let blockY = 0;
+    function updateGame() {
+      blockY++;
+      if (blockY >= ROWS) blockY = 0;
+      board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+      board[blockY][4] = 1;
+      drawBoard();
+    }
+
+    setInterval(updateGame, 500);
+
+    // Button event listeners (can be expanded)
+    document.getElementById("leftBtn").addEventListener("touchstart", () => alert("Left"));
+    document.getElementById("rightBtn").addEventListener("touchstart", () => alert("Right"));
+    document.getElementById("downBtn").addEventListener("touchstart", () => alert("Down"));
+    document.getElementById("rotateBtn").addEventListener("touchstart", () => alert("Rotate"));
+  </script>
 </body>
 </html>

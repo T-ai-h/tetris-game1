@@ -2,57 +2,116 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Tetris Game</title>
-  <link rel="stylesheet" href="styles.css">
   <style>
     html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
+      margin: 0; padding: 0;
+      width: 100%; height: 100%;
       overflow: hidden;
-      display: flex;
-      justify-content: center;
-      align-items: center;
       background: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: sans-serif;
+      color: white;
+      user-select: none;
     }
-    canvas {
+
+    #game {
+      background: #222;
+      border: 2px solid #555;
+      image-rendering: pixelated;
       display: block;
-      background: #111;
-      max-width: 100vw;
-      max-height: 100vh;
-      width: 100%;
-      height: auto;
+    }
+
+    #next {
+      background: #222;
+      border: 2px solid #555;
+      margin-top: 10px;
+      image-rendering: pixelated;
+    }
+
+    #hud {
+      margin-top: 10px;
+      display: flex;
+      gap: 20px;
+      font-size: 1.2em;
+    }
+
+    #controls {
+      margin-top: 15px;
+      display: flex;
+      gap: 10px;
+    }
+
+    #controls button {
+      padding: 10px 15px;
+      font-size: 1.5em;
+      background: #333;
+      border: none;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.2s ease;
+    }
+    #controls button:hover {
+      background: #555;
+    }
+
+    #gameOverlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      color: white;
+      font-size: 2em;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      z-index: 10;
+    }
+
+    #restartBtn {
+      margin-top: 20px;
+      padding: 10px 25px;
+      font-size: 1.2em;
+      border: none;
+      background: #008800;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.3s ease;
+    }
+    #restartBtn:hover {
+      background: #00bb00;
     }
   </style>
 </head>
 <body>
-  <canvas id="tetris"></canvas>
+  <canvas id="game" width="300" height="600"></canvas>
 
-  <script>
-    const canvas = document.getElementById('tetris');
-    const context = canvas.getContext('2d');
+  <canvas id="next" width="120" height="120"></canvas>
 
-    function resizeCanvas() {
-      const aspectRatio = 10 / 20;
-      const width = window.innerWidth;
-      const height = window.innerHeight;
+  <div id="hud">
+    <div>Score: <span id="score">0</span></div>
+    <div>Level: <span id="level">1</span></div>
+  </div>
 
-      if (width / height > aspectRatio) {
-        canvas.height = height;
-        canvas.width = height * aspectRatio;
-      } else {
-        canvas.width = width;
-        canvas.height = width / aspectRatio;
-      }
+  <div id="controls">
+    <button id="leftBtn">◀️</button>
+    <button id="rightBtn">▶️</button>
+    <button id="downBtn">⬇️</button>
+    <button id="rotateBtn">🔁</button>
+  </div>
 
-      context.scale(canvas.width / 200, canvas.height / 400);
-    }
-
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
-  </script>
+  <div id="gameOverlay">
+    <div>Game Over</div>
+    <button id="restartBtn">Restart</button>
+  </div>
 
   <script src="game.js"></script>
 </body>

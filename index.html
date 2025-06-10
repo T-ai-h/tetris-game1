@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Tetris Mobile</title>
 <style>
-  /* Reset & base */
   html, body {
     margin:0; padding:0;
     width:100%; height:100%;
@@ -77,7 +76,6 @@
     background: #555;
   }
 
-  /* Game Over Overlay */
   #gameOverlay {
     position: fixed;
     top:0; left:0; right:0; bottom:0;
@@ -166,7 +164,8 @@
   // Game config
   const COLS = 10;
   const ROWS = 20;
-  const BLOCK_SIZE = 30; // canvas size 300x600 / 10x20 blocks
+  const BLOCK_SIZE = 30;
+  // Speeds per level (ms per drop)
   const LEVEL_SPEEDS = [800, 650, 500, 370, 250, 150, 100, 70, 50, 30];
 
   // Colors for each tetromino type
@@ -202,7 +201,6 @@
     }
   }
 
-  // Draw single block
   function drawBlock(ctx, x, y, color) {
     ctx.fillStyle = color;
     ctx.fillRect(x, y, BLOCK_SIZE, BLOCK_SIZE);
@@ -211,7 +209,6 @@
     ctx.strokeRect(x, y, BLOCK_SIZE, BLOCK_SIZE);
   }
 
-  // Draw the whole board
   function drawBoard() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     for(let r=0; r<ROWS; r++){
@@ -224,7 +221,6 @@
     }
   }
 
-  // Piece class
   class Piece {
     constructor(type){
       this.type = type;
@@ -275,7 +271,6 @@
     }
   }
 
-  // Collision check
   function collide(board, piece, xOffset=0, yOffset=0) {
     for(let r=0; r<piece.shape.length; r++){
       for(let c=0; c<piece.shape[r].length; c++){
@@ -290,7 +285,6 @@
     return false;
   }
 
-  // Merge piece into board
   function merge(board, piece) {
     for(let r=0; r<piece.shape.length; r++){
       for(let c=0; c<piece.shape[r].length; c++){
@@ -303,14 +297,12 @@
     }
   }
 
-  // Clear full lines
   function clearLines() {
     let lines = 0;
     outer: for(let r=ROWS-1; r>=0; r--){
       for(let c=0; c<COLS; c++){
         if(board[r][c] === 0) continue outer;
       }
-      // line full
       board.splice(r,1);
       board.unshift(new Array(COLS).fill(0));
       lines++;
@@ -319,7 +311,6 @@
     return lines;
   }
 
-  // Game state
   let currentPiece;
   let nextPiece;
   let dropCounter = 0;
@@ -330,7 +321,9 @@
   let linesCleared = 0;
   let isGameOver = false;
 
-  // Reset game
+  // For speed increase per second
+  let lastSpeedIncreaseTime = 0;
+
   function resetGame() {
     createBoard();
     score = 0;
@@ -348,12 +341,10 @@
     nextPiece.drawNext(nextCtx);
   }
 
-  // Random piece
   function randomPiece() {
     return new Piece(Math.floor(Math.random() * (SHAPES.length - 1)) + 1);
   }
 
-  // Move piece
   function movePiece(dx, dy) {
     if(!collide(board, currentPiece, dx, dy)){
       currentPiece.x += dx;
@@ -363,19 +354,16 @@
     return false;
   }
 
-  // Rotate piece with wall kick
   function rotatePiece() {
     let oldShape = currentPiece.shape;
     currentPiece.rotate();
     if(collide(board, currentPiece)){
-      // try wall kick left/right
       if(!collide(board, currentPiece, -1, 0)) currentPiece.x -= 1;
       else if(!collide(board, currentPiece, 1, 0)) currentPiece.x += 1;
-      else currentPiece.shape = oldShape; // revert if no place
+      else currentPiece.shape = oldShape;
     }
   }
 
-  // Drop piece by one block
   function dropPiece() {
     if(!movePiece(0,1)){
       merge(board, currentPiece);
@@ -399,70 +387,82 @@
     }
   }
 
-  // Game over
   function gameOver() {
     isGameOver = true;
     gameOverlay.style.display = 'flex';
   }
 
-  // Game loop
   function update(time=0){
     if(isGameOver) return;
+
     const deltaTime = time - lastTime;
     lastTime = time;
+
     dropCounter += deltaTime;
+
+    // Speed up dropInterval by 1ms every 1 second (1000 ms)
+    if(time - lastSpeedIncreaseTime > 1000){
+      if(dropInterval > 50) dropInterval -= 1;
+      lastSpeedIncreaseTime = time;
+    }
+
     if(dropCounter > dropInterval){
       dropPiece();
       dropCounter = 0;
     }
+
     drawBoard();
     currentPiece.draw(ctx);
+
     requestAnimationFrame(update);
   }
 
-  // Controls handlers
-  leftBtn.addEventListener('touchstart', e => {
-    e.preventDefault();
-    if(!isGameOver){
-      movePiece(-1,0);
-      drawBoard();
-      currentPiece.draw(ctx);
-    }
-  }, {passive:false});
-  rightBtn.addEventListener('touchstart', e => {
-    e.preventDefault();
-    if(!isGameOver){
-      movePiece(1,0);
-      drawBoard();
-      currentPiece.draw(ctx);
-    }
-  }, {passive:false});
-  downBtn.addEventListener('touchstart', e => {
-    e.preventDefault();
-    if(!isGameOver){
-      dropPiece();
-      drawBoard();
-      currentPiece.draw(ctx);
-    }
-  }, {passive:false});
-  rotateBtn.addEventListener('touchstart', e => {
-    e.preventDefault();
-    if(!isGameOver){
-      rotatePiece();
-      drawBoard();
-      currentPiece.draw(ctx);
-    }
-  }, {passive:false});
+  // Controls events
+  leftBtn.addEventListener('click', () => {
+    if(isGameOver) return;
+    movePiece(-1, 0);
+    drawBoard();
+    currentPiece.draw(ctx);
+  });
+  rightBtn.addEventListener('click', () => {
+    if(isGameOver) return;
+    movePiece(1, 0);
+    drawBoard();
+    currentPiece.draw(ctx);
+  });
+  downBtn.addEventListener('click', () => {
+    if(isGameOver) return;
+    dropPiece();
+    drawBoard();
+    currentPiece.draw(ctx);
+  });
+  rotateBtn.addEventListener('click', () => {
+    if(isGameOver) return;
+    rotatePiece();
+    drawBoard();
+    currentPiece.draw(ctx);
+  });
 
   restartBtn.addEventListener('click', () => {
     resetGame();
     update();
   });
 
-  // Initialize game
+  // Keyboard controls for debugging (optional)
+  window.addEventListener('keydown', e => {
+    if(isGameOver) return;
+    switch(e.key){
+      case 'ArrowLeft': movePiece(-1, 0); break;
+      case 'ArrowRight': movePiece(1, 0); break;
+      case 'ArrowDown': dropPiece(); break;
+      case 'ArrowUp': rotatePiece(); break;
+    }
+    drawBoard();
+    currentPiece.draw(ctx);
+  });
+
   resetGame();
   update();
-
 })();
 </script>
 

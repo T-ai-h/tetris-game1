@@ -41,27 +41,25 @@
     }
 
     #controls {
-  margin-top: 15px;
-  display: flex;
-  flex-wrap: wrap; /* ✅ ปุ่มจะขึ้นบรรทัดใหม่ได้ */
-  gap: 10px;
-  justify-content: center;
-  padding: 10px;
-}
+      margin-top: 15px;
+      display: flex;
+      gap: 10px;
+    }
 
-#controls button {
-  padding: 10px 0;
-  font-size: 1.2em;
-  width: 22vw;           /* ✅ ขนาดปุ่มปรับตามความกว้างจอ */
-  max-width: 70px;        /* ✅ จำกัดขนาดสูงสุดบนหน้าจอใหญ่ */
-  background: #333;
-  border: none;
-  color: white;
-  border-radius: 5px;
-  cursor: pointer;
-  user-select: none;
-}
-
+    #controls button {
+      padding: 10px 15px;
+      font-size: 1.5em;
+      background: #333;
+      border: none;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.2s ease;
+    }
+    #controls button:hover {
+      background: #555;
+    }
 
     #gameOverlay {
       position: fixed;

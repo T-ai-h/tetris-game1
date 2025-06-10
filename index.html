@@ -360,7 +360,7 @@
     if(collide(board, currentPiece)){
       if(!collide(board, currentPiece, -1, 0)) currentPiece.x -= 1;
       else if(!collide(board, currentPiece, 1, 0)) currentPiece.x += 1;
-      else currentPiece.shape = oldShape;
+      else currentPiece.shape = oldShape; // revert rotation
     }
   }
 
@@ -368,12 +368,14 @@
     if(!movePiece(0,1)){
       merge(board, currentPiece);
       let cleared = clearLines();
-      if(cleared > 0) {
+      if(cleared){
         linesCleared += cleared;
-        score += cleared * 100 * level;
-        if(linesCleared >= level * 5){
+        score += cleared * 100;
+        if(linesCleared >= level * 10){
           level++;
-          dropInterval = LEVEL_SPEEDS[Math.min(level-1, LEVEL_SPEEDS.length-1)];
+          if(level - 1 < LEVEL_SPEEDS.length){
+            dropInterval = LEVEL_SPEEDS[level-1];
+          }
         }
         scoreEl.textContent = score;
         levelEl.textContent = level;
@@ -382,30 +384,19 @@
       nextPiece = randomPiece();
       nextPiece.drawNext(nextCtx);
       if(collide(board, currentPiece)){
-        gameOver();
+        // Game over
+        isGameOver = true;
+        gameOverlay.style.display = 'flex';
       }
     }
   }
 
-  function gameOver() {
-    isGameOver = true;
-    gameOverlay.style.display = 'flex';
-  }
-
-  function update(time=0){
+  function update(time=0) {
     if(isGameOver) return;
-
     const deltaTime = time - lastTime;
     lastTime = time;
 
     dropCounter += deltaTime;
-
-    // Speed up dropInterval by 1ms every 1 second (1000 ms)
-    if(time - lastSpeedIncreaseTime > 1000){
-      if(dropInterval > 50) dropInterval -= 1;
-      lastSpeedIncreaseTime = time;
-    }
-
     if(dropCounter > dropInterval){
       dropPiece();
       dropCounter = 0;
@@ -417,25 +408,21 @@
     requestAnimationFrame(update);
   }
 
-  // Controls events
+  // Controls handlers (except downBtn for press and hold)
   leftBtn.addEventListener('click', () => {
     if(isGameOver) return;
-    movePiece(-1, 0);
+    movePiece(-1,0);
     drawBoard();
     currentPiece.draw(ctx);
   });
+
   rightBtn.addEventListener('click', () => {
     if(isGameOver) return;
-    movePiece(1, 0);
+    movePiece(1,0);
     drawBoard();
     currentPiece.draw(ctx);
   });
-  downBtn.addEventListener('click', () => {
-    if(isGameOver) return;
-    dropPiece();
-    drawBoard();
-    currentPiece.draw(ctx);
-  });
+
   rotateBtn.addEventListener('click', () => {
     if(isGameOver) return;
     rotatePiece();
@@ -443,26 +430,65 @@
     currentPiece.draw(ctx);
   });
 
+  // For downBtn: allow press and hold
+  let downPressed = false;
+  let downInterval;
+
+  function pressDown() {
+    if(isGameOver) return;
+    if(!downPressed){
+      downPressed = true;
+      dropPiece();
+      drawBoard();
+      currentPiece.draw(ctx);
+      downInterval = setInterval(() => {
+        dropPiece();
+        drawBoard();
+        currentPiece.draw(ctx);
+      }, 100);
+    }
+  }
+  function releaseDown() {
+    downPressed = false;
+    clearInterval(downInterval);
+  }
+
+  // Touch events
+  downBtn.addEventListener('touchstart', e => {
+    e.preventDefault();
+    pressDown();
+  });
+  downBtn.addEventListener('touchend', e => {
+    e.preventDefault();
+    releaseDown();
+  });
+  downBtn.addEventListener('touchcancel', e => {
+    e.preventDefault();
+    releaseDown();
+  });
+
+  // Mouse events
+  downBtn.addEventListener('mousedown', e => {
+    e.preventDefault();
+    pressDown();
+  });
+  downBtn.addEventListener('mouseup', e => {
+    e.preventDefault();
+    releaseDown();
+  });
+  downBtn.addEventListener('mouseleave', e => {
+    e.preventDefault();
+    releaseDown();
+  });
+
   restartBtn.addEventListener('click', () => {
     resetGame();
-    update();
   });
 
-  // Keyboard controls for debugging (optional)
-  window.addEventListener('keydown', e => {
-    if(isGameOver) return;
-    switch(e.key){
-      case 'ArrowLeft': movePiece(-1, 0); break;
-      case 'ArrowRight': movePiece(1, 0); break;
-      case 'ArrowDown': dropPiece(); break;
-      case 'ArrowUp': rotatePiece(); break;
-    }
-    drawBoard();
-    currentPiece.draw(ctx);
-  });
-
+  // Start game
   resetGame();
   update();
+
 })();
 </script>
 

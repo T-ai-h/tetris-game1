@@ -371,7 +371,7 @@
       if(cleared > 0) {
         linesCleared += cleared;
         score += cleared * 100 * level;
-        if(linesCleared >= level * 10){
+        if(linesCleared >= level * 5){
           level++;
           dropInterval = LEVEL_SPEEDS[Math.min(level-1, LEVEL_SPEEDS.length-1)];
         }

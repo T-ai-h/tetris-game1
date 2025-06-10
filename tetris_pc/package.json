@@ -1,0 +1,21 @@
+{
+  "name": "falling-block-game",
+  "version": "1.0.0",
+  "description": "A simple falling block game implemented in JavaScript.",
+  "main": "src/game.js",
+  "scripts": {
+    "start": "live-server src"
+  },
+  "keywords": [
+    "tetris",
+    "falling blocks",
+    "game",
+    "javascript"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "live-server": "^1.2.1"
+  }
+}

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Tetris Game</title>
+  <title>Tetris Game (Mobile)</title>
   <style>
     html, body {
       margin: 0; padding: 0;
@@ -16,64 +16,63 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
     }
 
-    #gameArea {
+    #hud {
       display: flex;
-      flex-direction: column;
-      align-items: center;
       justify-content: center;
+      gap: 30px;
+      font-size: 1.2em;
+      padding: 10px;
+    }
+
+    #mainArea {
+      flex: 1;
+      display: flex;
+      flex-direction: row;
+      width: 100%;
+      box-sizing: border-box;
+      justify-content: center;
+      align-items: center;
       gap: 10px;
-      margin-top: 10px;
+      padding: 5px;
     }
 
     #game {
       background: #222;
       border: 2px solid #555;
       image-rendering: pixelated;
-      display: block;
-    }
-
-    #next {
-      background: #222;
-      border: 2px solid #555;
-      image-rendering: pixelated;
-    }
-
-    #hud {
-      margin-top: 10px;
-      display: flex;
-      gap: 20px;
-      font-size: 1.2em;
-      justify-content: center;
     }
 
     #controls {
-      margin-top: 15px;
       display: flex;
+      flex-direction: column;
       gap: 10px;
-      flex-wrap: wrap;
       justify-content: center;
-      padding: 0 10px 20px;
+      align-items: center;
+      flex-wrap: wrap;
     }
 
     #controls button {
-      padding: 10px 12px;
-      font-size: 1.4em;
+      padding: 10px 15px;
+      font-size: 1.5em;
       background: #333;
       border: none;
       color: white;
-      border-radius: 6px;
+      border-radius: 5px;
       cursor: pointer;
       user-select: none;
       transition: background-color 0.2s ease;
-      width: 22vw;
+      width: 20vw;
       max-width: 70px;
     }
 
     #controls button:hover {
       background: #555;
+    }
+
+    #next {
+      display: none; /* ไม่แสดงในมือถือ */
     }
 
     #gameOverlay {
@@ -101,46 +100,46 @@
       user-select: none;
       transition: background-color 0.3s ease;
     }
-
     #restartBtn:hover {
       background: #00bb00;
     }
 
-    /* Responsive: mobile layout (portrait) */
     @media (max-width: 600px) {
-      #controls button {
-        width: 24vw;
-        max-width: 65px;
-        font-size: 1.3em;
-        padding: 8px 10px;
+      #controls {
+        flex-direction: column;
+        gap: 10px;
       }
 
-      #hud {
-        flex-direction: column;
-        align-items: center;
-        gap: 5px;
+      #controls button {
+        width: 22vw;
+        max-width: 65px;
+        font-size: 1.4em;
+        padding: 8px 10px;
       }
     }
   </style>
 </head>
 <body>
-  <div id="gameArea">
-    <canvas id="game" width="300" height="600"></canvas>
-    <canvas id="next" width="120" height="120"></canvas>
-  </div>
 
+  <!-- HUD ด้านบน -->
   <div id="hud">
     <div>Score: <span id="score">0</span></div>
     <div>Level: <span id="level">1</span></div>
   </div>
 
-  <div id="controls">
-    <button id="leftBtn">◀️</button>
-    <button id="rightBtn">▶️</button>
-    <button id="downBtn">⬇️</button>
-    <button id="rotateBtn">🔁</button>
+  <!-- Main Layout -->
+  <div id="mainArea">
+    <canvas id="game" width="300" height="600"></canvas>
+
+    <div id="controls">
+      <button id="leftBtn">◀️</button>
+      <button id="rightBtn">▶️</button>
+      <button id="downBtn">⬇️</button>
+      <button id="rotateBtn">🔁</button>
+    </div>
   </div>
 
+  <!-- Overlay เมื่อจบเกม -->
   <div id="gameOverlay">
     <div>Game Over</div>
     <button id="restartBtn">Restart</button>

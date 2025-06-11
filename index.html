@@ -135,14 +135,45 @@
     transform: scale(0.9);
   }
   #pauseBtn, #resumeBtn {
-    max-width: 120px;
-    font-size: 1.1em;
-    background: linear-gradient(135deg, #ff1744, #f50057);
-    box-shadow:
-      0 0 20px #f50057,
-      inset 0 0 15px #ff1744;
-    margin-left: 10px;
-  }
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  margin: 0 5px;
+}
+
+/* ปุ่มหยุด: สองขีดแนวตั้ง */
+#pauseBtn::before, #pauseBtn::after {
+  content: '';
+  position: absolute;
+  top: 8px;
+  width: 8px;
+  height: 24px;
+  background-color: #ddd;
+  border-radius: 2px;
+}
+#pauseBtn::before {
+  left: 10px;
+}
+#pauseBtn::after {
+  right: 10px;
+}
+
+/* ปุ่มเล่น: รูปสามเหลี่ยมแนวขวา */
+#resumeBtn::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 12px;
+  width: 0;
+  height: 0;
+  border-top: 14px solid transparent;
+  border-bottom: 14px solid transparent;
+  border-left: 20px solid #ddd;
+}
+
   #pauseBtn:hover, #resumeBtn:hover {
     background: linear-gradient(135deg, #f50057, #c51162);
     box-shadow:
@@ -191,8 +222,10 @@
   <button id="rightBtn">→</button>
   <button id="rotateBtn">⟳</button>
   <button id="downBtn">↓</button>
-  <button id="pauseBtn">หยุดชั่วคราว</button>
-  <button id="resumeBtn" style="display:none;">เล่นต่อ</button>
+  <!-- แก้ไขปุ่มในส่วน controls ให้เป็นปุ่มเปล่าที่มี icon แทนข้อความ -->
+<button id="pauseBtn" title="Pause" aria-label="Pause"></button>
+<button id="resumeBtn" title="Play" aria-label="Play" style="display:none;"></button>
+
 </div>
 
 <script>
@@ -411,8 +444,8 @@
   }
 
   function updateLevel() {
-    level = Math.floor(linesCleared / 10) + 1;
-    dropInterval = Math.max(100, 800 - (level-1) * 70);
+    level = Math.floor(linesCleared / 3) + 1;
+    dropInterval = Math.max(100, 500 - (level-1) * 100);
   }
 
   function updateScoreLevel() {

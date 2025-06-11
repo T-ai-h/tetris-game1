@@ -320,22 +320,53 @@
 
     function rotate(piece) {
       const N = piece.shape.length;
-      const newShape = Array.from({length: N}, () => Array(N).fill(0));
+      let newShape = Array.from({ length: N }, () => Array(N).fill(0));
       for (let r = 0; r < N; r++) {
         for (let c = 0; c < N; c++) {
           newShape[c][N - 1 - r] = piece.shape[r][c];
         }
       }
-      return newShape;
+      const oldShape = piece.shape;
+      piece.shape = newShape;
+      if (collide(board, piece)) {
+        piece.shape = oldShape;
+        return false;
+      }
+      return true;
     }
 
     function randomPiece() {
-      const type = Math.floor(Math.random() * (SHAPES.length -1)) +1;
-      return {type, shape: SHAPES[type], x: 3, y: -2};
+      const type = Math.floor(Math.random() * (SHAPES.length - 1)) + 1;
+      return { type, shape: SHAPES[type].map(row => row.slice()), x: 3, y: -2 };
     }
 
-    function drop() {
-      if (paused || gameOver) return;
+    function clearLines() {
+      let lines = 0;
+      outer: for (let r = ROWS - 1; r >= 0; r--) {
+        for (let c = 0; c < COLS; c++) {
+          if (!board[r][c]) continue outer;
+        }
+        const row = board.splice(r, 1)[0].fill(0);
+        board.unshift(row);
+        lines++;
+        r++;
+      }
+      if (lines > 0) {
+        play('clear');
+        score += lines * 100 * level;
+        linesCleared += lines;
+        if (linesCleared >= level * 10) {
+          level++;
+          linesCleared = 0;
+          dropInterval = Math.max(100, dropInterval - 100);
+          play('levelup');
+        }
+        updateUI();
+      }
+    }
+
+    function moveDown() {
+      if (paused) return;
       current.y++;
       if (collide(board, current)) {
         current.y--;
@@ -347,85 +378,49 @@
         drawNext();
         if (collide(board, current)) {
           gameOver = true;
-          overlay.style.display = 'flex';
           play('gameover');
+          overlay.style.display = 'flex';
         }
       } else {
         play('move');
       }
-      dropCounter = 0;
-    }
-
-    function clearLines() {
-      let lines = 0;
-      outer: for (let r = ROWS - 1; r >= 0; r--) {
-        for (let c = 0; c < COLS; c++) {
-          if (!board[r][c]) continue outer;
-        }
-        board.splice(r, 1);
-        board.unshift(Array(COLS).fill(0));
-        lines++;
-        r++;
-      }
-      if (lines > 0) {
-        play('clear');
-        score += lines * lines * 100;
-        linesCleared += lines;
-
-        const oldLevel = level;
-        level = Math.floor(linesCleared / 5) + 1;
-        dropInterval = Math.max(100, 800 - (level - 1) * 100);
-        updateUI();
-
-        if (level > oldLevel) {
-          play('levelup');  // เล่นเสียงตอนเลเวลอัป
-        }
-      }
     }
 
     function moveLeft() {
-      if (paused || gameOver) return;
+      if (paused) return;
       current.x--;
       if (collide(board, current)) current.x++;
       else play('move');
     }
+
     function moveRight() {
-      if (paused || gameOver) return;
+      if (paused) return;
       current.x++;
       if (collide(board, current)) current.x--;
       else play('move');
     }
-    function moveDown() {
-      if (paused || gameOver) return;
-      drop();
-      play('move');
-    }
+
     function rotatePiece() {
-      if (paused || gameOver) return;
-      const rotatedShape = rotate(current);
-      const oldShape = current.shape;
-      current.shape = rotatedShape;
-      if (collide(board, current)) {
-        current.shape = oldShape;
-      } else {
-        play('rotate');
-      }
+      if (paused) return;
+      if (rotate(current)) play('rotate');
     }
 
-    // Game Loop
     function update(time = 0) {
       if (!lastTime) lastTime = time;
       const delta = time - lastTime;
-      dropCounter += delta;
-      if (dropCounter > dropInterval) {
-        drop();
+      if (!paused && !gameOver) {
+        dropCounter += delta;
+        if (dropCounter > dropInterval) {
+          moveDown();
+          dropCounter = 0;
+        }
       }
       lastTime = time;
       draw();
-      if (!gameOver) requestAnimationFrame(update);
+      requestAnimationFrame(update);
     }
 
-    // Event listeners ปุ่มสัมผัส
+    // Controls
     document.getElementById('leftBtn').addEventListener('touchstart', e => {
       e.preventDefault();
       moveLeft();
@@ -434,10 +429,26 @@
       e.preventDefault();
       moveRight();
     });
-    document.getElementById('downBtn').addEventListener('touchstart', e => {
+
+    // ปุ่มลงบล็อก (แก้ไขตรงนี้)
+    const downBtn = document.getElementById('downBtn');
+    let downInterval;
+    downBtn.addEventListener('touchstart', e => {
       e.preventDefault();
-      moveDown();
+      moveDown(); // ลงครั้งแรก
+      downInterval = setInterval(() => {
+        moveDown();
+      }, 100);
     });
+    downBtn.addEventListener('touchend', e => {
+      e.preventDefault();
+      clearInterval(downInterval);
+    });
+    downBtn.addEventListener('touchcancel', e => {
+      e.preventDefault();
+      clearInterval(downInterval);
+    });
+
     document.getElementById('rotateBtn').addEventListener('touchstart', e => {
       e.preventDefault();
       rotatePiece();
@@ -448,33 +459,26 @@
       pauseBtn.style.display = 'none';
       resumeBtn.style.display = 'inline-block';
     });
-
     resumeBtn.addEventListener('click', () => {
-      if (!gameOver) {
-        paused = false;
-        pauseBtn.style.display = 'inline-block';
-        resumeBtn.style.display = 'none';
-        lastTime = performance.now();
-        requestAnimationFrame(update);
-      }
+      paused = false;
+      pauseBtn.style.display = 'inline-block';
+      resumeBtn.style.display = 'none';
     });
 
     restartBtn.addEventListener('click', () => {
-      reset();
       gameOver = false;
-      overlay.style.display = 'none';
-      lastTime = performance.now();
-      requestAnimationFrame(update);
+      reset();
     });
 
     startBtn.addEventListener('click', () => {
       menu.style.display = 'none';
       reset();
-      lastTime = performance.now();
-      requestAnimationFrame(update);
+      drawNext();
+      update();
     });
 
   })();
   </script>
+
 </body>
 </html>

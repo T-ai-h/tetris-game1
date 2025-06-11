@@ -527,15 +527,15 @@
 
   // การเล่นเสียง (เปลี่ยนตามไฟล์จริงถ้ามี)
   const sounds = {
-    move: new Audio(),
-    rotate: new Audio(),
+    move: new Audio('sounds/move.wav'),
+    rotate: new Audio('sounds/rotate.wav'),
     down: new Audio(),
-    clear: new Audio(),
+    clear: new Audio('sounds/clear.wav'),
     fail: new Audio(),
-    start: new Audio(),
+    start: new Audio('sounds/start.wav'),
     pause: new Audio(),
     resume: new Audio(),
-    gameover: new Audio(),
+    gameover: new Audio('sounds/gameover.wav'),
   };
   // ตัวอย่าง: ใส่ src ไฟล์เสียงที่มีจริงได้ เช่น
   // sounds.move.src = 'sounds/move.mp3';

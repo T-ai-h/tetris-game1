@@ -128,8 +128,8 @@
     <button id="rightBtn">▶️</button>
     <button id="downBtn">⬇️</button>
     <button id="rotateBtn">🔄</button>
-    <button id="pauseBtn">⏸️</button>
-    <button id="resumeBtn" style="display:none;">▶️</button>
+    <button id="pauseBtn">⏸️ Pause</button>
+    <button id="resumeBtn" style="display:none;">▶️ Resume</button>
   </div>
 
   <div id="gameOverlay" style="display:none;">
@@ -171,24 +171,61 @@
     const restartBtn = document.getElementById('restartBtn');
     const startBtn = document.getElementById('startBtn');
     const menu = document.getElementById('menuScreen');
+
     const pauseBtn = document.getElementById('pauseBtn');
     const resumeBtn = document.getElementById('resumeBtn');
 
     const COLS = 10, ROWS = 20, BLOCK = 30;
     const COLORS = [null, '#FF0D72', '#0DC2FF', '#0DFF72', '#F538FF', '#FF8E0D', '#FFE138', '#3877FF'];
+
+    // SHAPES เป็นแมทริกซ์ 4x4 จัตุรัสทั้งหมด
     const SHAPES = [
       [],
-      [[0,1,0],[1,1,1]],       // T
-      [[1],[1],[1],[1]],       // I
-      [[0,1,1],[1,1,0]],       // S
-      [[1,1,0],[0,1,1]],       // Z
-      [[1,0,0],[1,1,1]],       // J
-      [[1,1],[1,1]],           // O
-      [[0,0,1],[1,1,1]]        // L
+      [
+        [0,0,0,0],
+        [0,1,0,0],
+        [1,1,1,0],
+        [0,0,0,0]
+      ], // T
+      [
+        [0,0,1,0],
+        [0,0,1,0],
+        [0,0,1,0],
+        [0,0,1,0]
+      ], // I
+      [
+        [0,0,0,0],
+        [0,1,1,0],
+        [1,1,0,0],
+        [0,0,0,0]
+      ], // S
+      [
+        [0,0,0,0],
+        [1,1,0,0],
+        [0,1,1,0],
+        [0,0,0,0]
+      ], // Z
+      [
+        [0,1,0,0],
+        [0,1,0,0],
+        [1,1,0,0],
+        [0,0,0,0]
+      ], // J
+      [
+        [0,0,0,0],
+        [0,1,1,0],
+        [0,1,1,0],
+        [0,0,0,0]
+      ], // O
+      [
+        [0,1,0,0],
+        [0,1,0,0],
+        [0,1,1,0],
+        [0,0,0,0]
+      ]  // L
     ];
 
-    let board, current, next, dropCounter, dropInterval, lastTime, score, level, linesCleared, gameOver;
-    let paused = false;
+    let board, current, next, dropCounter, dropInterval, lastTime, score, level, linesCleared, gameOver, paused;
 
     function reset() {
       board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
@@ -201,10 +238,10 @@
       current = randomPiece();
       next = randomPiece();
       overlay.style.display = 'none';
+      updateUI();
       paused = false;
       pauseBtn.style.display = 'inline-block';
       resumeBtn.style.display = 'none';
-      updateUI();
     }
 
     function updateUI() {
@@ -232,24 +269,122 @@
     function drawPiece(p) {
       for (let r = 0; r < p.shape.length; r++) {
         for (let c = 0; c < p.shape[r].length; c++) {
-          if (p.shape[r][c]) drawBlock((p.x + c) * BLOCK, (p.y + r) * BLOCK, p.color);
+          if (p.shape[r][c]) drawBlock((p.x + c) * BLOCK, (p.y + r) * BLOCK, COLORS[p.type]);
         }
       }
     }
 
     function drawNext() {
-      const s = next.shape.length;
-      const b = BLOCK / 2;
       nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
-      for (let r = 0; r < s; r++) {
-        for (let c = 0; c < s; c++) {
+      for (let r = 0; r < next.shape.length; r++) {
+        for (let c = 0; c < next.shape[r].length; c++) {
           if (next.shape[r][c]) {
-            nextCtx.fillStyle = next.color;
-            nextCtx.fillRect(c * b + 20, r * b + 20, b, b);
+            nextCtx.fillStyle = COLORS[next.type];
+            nextCtx.fillRect(c * BLOCK / 2, r * BLOCK / 2, BLOCK / 2, BLOCK / 2);
             nextCtx.strokeStyle = '#222';
-            nextCtx.strokeRect(c * b + 20, r * b + 20, b, b);
+            nextCtx.strokeRect(c * BLOCK / 2, r * BLOCK / 2, BLOCK / 2, BLOCK / 2);
           }
         }
+      }
+    }
+
+    function collide(board, piece) {
+      for (let r = 0; r < piece.shape.length; r++) {
+        for (let c = 0; c < piece.shape[r].length; c++) {
+          if (piece.shape[r][c]) {
+            let x = piece.x + c;
+            let y = piece.y + r;
+            if (x < 0 || x >= COLS || y >= ROWS) return true;
+            if (y >= 0 && board[y][x]) return true;
+          }
+        }
+      }
+      return false;
+    }
+
+    function merge(board, piece) {
+      for (let r = 0; r < piece.shape.length; r++) {
+        for (let c = 0; c < piece.shape[r].length; c++) {
+          if (piece.shape[r][c]) {
+            let x = piece.x + c;
+            let y = piece.y + r;
+            if (y >= 0 && y < ROWS && x >= 0 && x < COLS) board[y][x] = piece.type;
+          }
+        }
+      }
+    }
+
+    function rotateMatrix(matrix) {
+      const N = matrix.length;
+      const rotated = Array.from({ length: N }, () => Array(N).fill(0));
+      for (let y = 0; y < N; y++) {
+        for (let x = 0; x < N; x++) {
+          rotated[x][N - 1 - y] = matrix[y][x];
+        }
+      }
+      return rotated;
+    }
+
+    function rotatePiece() {
+      const rotatedShape = rotateMatrix(current.shape);
+      const oldX = current.x;
+      let offset = 0;
+
+      current.shape = rotatedShape;
+
+      // ถ้าชนขอบซ้ายหรือขวา ให้เลื่อนบล็อกเข้าในกระดาน
+      while (collide(board, current)) {
+        current.x += (offset % 2 === 0 ? 1 : -1) * Math.ceil(offset / 2);
+        offset++;
+        if (offset > 4) { 
+          // หมุนไม่ได้ ต้องกลับรูปเดิม
+          current.shape = rotateMatrix(rotateMatrix(rotateMatrix(current.shape)));
+          current.x = oldX;
+          return;
+        }
+      }
+      play('rotate');
+    }
+
+    function drop() {
+      current.y++;
+      if (collide(board, current)) {
+        current.y--;
+        merge(board, current);
+        play('land');
+        clearLines();
+        current = next;
+        next = randomPiece();
+        if (collide(board, current)) {
+          gameOver = true;
+          overlay.style.display = 'flex';
+          play('gameover');
+          pauseBtn.style.display = 'none';
+          resumeBtn.style.display = 'none';
+        }
+        drawNext();
+      }
+      dropCounter = 0;
+    }
+
+    function clearLines() {
+      let lines = 0;
+      outer: for (let r = ROWS - 1; r >= 0; r--) {
+        for (let c = 0; c < COLS; c++) {
+          if (!board[r][c]) continue outer;
+        }
+        board.splice(r, 1);
+        board.unshift(Array(COLS).fill(0));
+        lines++;
+        r++;
+      }
+      if (lines > 0) {
+        play('clear');
+        score += lines * lines * 100;
+        linesCleared += lines;
+        level = Math.floor(linesCleared / 10) + 1;
+        dropInterval = Math.max(100, 800 - (level - 1) * 50);
+        updateUI();
       }
     }
 
@@ -265,147 +400,65 @@
       };
     }
 
-    function collide(p) {
-      for (let r = 0; r < p.shape.length; r++) {
-        for (let c = 0; c < p.shape[r].length; c++) {
-          if (p.shape[r][c]) {
-            const x = p.x + c, y = p.y + r;
-            if (x < 0 || x >= COLS || y >= ROWS || (y >= 0 && board[y][x])) return true;
-          }
-        }
+    function update(time = 0) {
+      if (paused || gameOver) return;
+      const deltaTime = time - lastTime;
+      lastTime = time;
+      dropCounter += deltaTime;
+      if (dropCounter > dropInterval) {
+        drop();
       }
-      return false;
-    }
-
-    function merge(p) {
-      for (let r = 0; r < p.shape.length; r++) {
-        for (let c = 0; c < p.shape[r].length; c++) {
-          if (p.shape[r][c]) {
-            const x = p.x + c, y = p.y + r;
-            if (y >= 0) board[y][x] = p.type;
-          }
-        }
-      }
-    }
-
-    function clearLines() {
-      let lines = 0;
-      outer: for (let r = ROWS - 1; r >= 0; r--) {
-        for (let c = 0; c < COLS; c++) {
-          if (!board[r][c]) continue outer;
-        }
-        board.splice(r, 1);
-        board.unshift(Array(COLS).fill(0));
-        lines++;
-        r++;
-      }
-      if (lines) {
-        play('clear');
-        score += lines * 100 * level;
-        linesCleared += lines;
-        if (linesCleared >= level * 5) {
-          level++;
-          dropInterval = Math.max(100, dropInterval - 100);
-        }
-      }
-    }
-
-    function drop() {
-      current.y++;
-      if (collide(current)) {
-        current.y--;
-        merge(current);
-        play('land');
-        clearLines();
-        current = next;
-        next = randomPiece();
-        drawNext();
-        if (collide(current)) {
-          play('gameover');
-          overlay.style.display = 'flex';
-          gameOver = true;
-          paused = true;
-          pauseBtn.style.display = 'none';
-          resumeBtn.style.display = 'none';
-        }
-      }
-      dropCounter = 0;
-    }
-
-    function update(t = 0) {
-      if (gameOver || paused) return;
-      const dt = t - lastTime;
-      lastTime = t;
-      dropCounter += dt;
-      if (dropCounter > dropInterval) drop();
       draw();
       requestAnimationFrame(update);
     }
 
-    function move(dx) {
+    // Controls
+    document.getElementById('leftBtn').onclick = () => {
       if (paused || gameOver) return;
-      current.x += dx;
-      if (collide(current)) current.x -= dx;
+      current.x--;
+      if (collide(board, current)) current.x++;
       else play('move');
-    }
-
-    function rotateMatrix(matrix) {
-      const N = matrix.length;
-      const rotated = Array.from({ length: N }, () => Array(N).fill(0));
-      for (let y = 0; y < N; y++) {
-        for (let x = 0; x < N; x++) {
-          rotated[x][N - 1 - y] = matrix[y][x];
-        }
-      }
-      return rotated;
-    }
-
-    function rotate() {
+    };
+    document.getElementById('rightBtn').onclick = () => {
       if (paused || gameOver) return;
-      const oldShape = current.shape;
-      const newShape = rotateMatrix(oldShape);
-      current.shape = newShape;
-      if (collide(current)) {
-        current.shape = oldShape;
-      } else {
-        play('rotate');
-      }
-    }
-
-    // Controls event listeners
-    document.getElementById('leftBtn').addEventListener('click', () => move(-1));
-    document.getElementById('rightBtn').addEventListener('click', () => move(1));
-    document.getElementById('downBtn').addEventListener('click', () => {
+      current.x++;
+      if (collide(board, current)) current.x--;
+      else play('move');
+    };
+    document.getElementById('downBtn').onclick = () => {
       if (paused || gameOver) return;
       drop();
-    });
-    document.getElementById('rotateBtn').addEventListener('click', rotate);
+    };
+    document.getElementById('rotateBtn').onclick = () => {
+      if (paused || gameOver) return;
+      rotatePiece();
+    };
 
-    pauseBtn.addEventListener('click', () => {
+    pauseBtn.onclick = () => {
       paused = true;
       pauseBtn.style.display = 'none';
       resumeBtn.style.display = 'inline-block';
-    });
+    };
 
-    resumeBtn.addEventListener('click', () => {
+    resumeBtn.onclick = () => {
       paused = false;
-      lastTime = performance.now();
       pauseBtn.style.display = 'inline-block';
       resumeBtn.style.display = 'none';
-      update();
-    });
+      lastTime = performance.now();
+      update(lastTime);
+    };
 
-    restartBtn.addEventListener('click', () => {
-      reset();
+    restartBtn.onclick = () => {
       gameOver = false;
+      reset();
       update();
-    });
+    };
 
-    startBtn.addEventListener('click', () => {
+    startBtn.onclick = () => {
       menu.style.display = 'none';
       reset();
       update();
-    });
+    };
 
   })();
   </script>

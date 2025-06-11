@@ -438,7 +438,7 @@
       linesCleared += lines;
       score += lines * lines * 50;
       level = Math.min(10, Math.floor(linesCleared / 3) + 1);
-      dropInterval = 300 - (level - 1) * 100;
+      dropInterval = 300 - (level - 1) * 70;
       playSound('clear');
       draw();
       updateScoreLevel();

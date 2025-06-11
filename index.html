@@ -6,6 +6,8 @@
 <title>Tetris Mobile Game</title>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
 <style>
+  /* --- โค้ด CSS ตามที่ให้มา --- */
+  /* ... (ไม่เปลี่ยนแปลง) ... */
   * {
     box-sizing: border-box;
   }
@@ -227,352 +229,323 @@
 </div>
 
 <script>
+  // -- โค้ดเกมตามที่ให้มา (ลดขนาดเพื่อง่ายต่ออ่าน) --
   const canvas = document.getElementById('game');
   const ctx = canvas.getContext('2d');
   const nextCanvas = document.getElementById('next');
   const nextCtx = nextCanvas.getContext('2d');
-  const scoreEl = document.getElementById('score');
-  const levelEl = document.getElementById('level');
-  const menuScreen = document.getElementById('menuScreen');
-  const gameOverlay = document.getElementById('gameOverlay');
-  const startBtn = document.getElementById('startBtn');
-  const restartBtn = document.getElementById('restartBtn');
-  const pauseBtn = document.getElementById('pauseBtn');
-  const resumeBtn = document.getElementById('resumeBtn');
-  const scoreLevelDiv = document.getElementById('scoreLevel');
-  const gameContainer = document.getElementById('gameContainer');
-  const controls = document.getElementById('controls');
 
-  const ROWS = 20;
-  const COLS = 10;
-  const BLOCK_SIZE = canvas.width / COLS;
+  const gridWidth = 10;
+  const gridHeight = 20;
+  const blockSize = 30;
 
-  // ชนิดบล็อกและสี
-  const SHAPES = [
+  canvas.width = gridWidth * blockSize;
+  canvas.height = gridHeight * blockSize;
+  nextCanvas.width = 4 * blockSize;
+  nextCanvas.height = 4 * blockSize;
+
+  // ตารางเกม
+  let board = [];
+  for(let y=0; y<gridHeight; y++) {
+    board[y] = new Array(gridWidth).fill(0);
+  }
+
+  // บล็อกต่างๆ
+  const shapes = [
     [],
     [[1,1,1,1]], // I
-    [[1,1,0],[0,1,1]], // Z
-    [[0,1,1],[1,1,0]], // S
-    [[1,1,1],[0,1,0]], // T
-    [[1,1],[1,1]], // O
-    [[1,0,0],[1,1,1]], // L
-    [[0,0,1],[1,1,1]], // J
-  ];
-  const COLORS = [
-    null,
-    '#00ffff', // I
-    '#ff0000', // Z
-    '#00ff00', // S
-    '#aa00ff', // T
-    '#ffff00', // O
-    '#ff8800', // L
-    '#0000ff', // J
+    [[2,2],[2,2]], // O
+    [[0,3,0],[3,3,3]], // T
+    [[4,4,0],[0,4,4]], // S
+    [[0,5,5],[5,5,0]], // Z
+    [[6,0,0],[6,6,6]], // J
+    [[0,0,7],[7,7,7]]  // L
   ];
 
-  let board = [];
-  let currentPiece = null;
+  const colors = [
+    'transparent',
+    '#00f0f0',
+    '#f0f000',
+    '#a000f0',
+    '#00f000',
+    '#f00000',
+    '#0000f0',
+    '#f0a000'
+  ];
+
+  // สุ่มบล็อก
+  function randomShape() {
+    return shapes[Math.floor(Math.random()*7)+1];
+  }
+
+  // หมุนบล็อก
+  function rotate(matrix) {
+    const N = matrix.length;
+    let result = [];
+    for(let x=0; x<N; x++) {
+      result[x] = [];
+      for(let y=0; y<N; y++) {
+        result[x][y] = matrix[N-1-y][x];
+      }
+    }
+    return result;
+  }
+
+  // ตัวแปรเกม
+  let currentShape = null;
   let currentX = 0;
   let currentY = 0;
-  let nextPiece = null;
+  let nextShape = null;
   let score = 0;
   let level = 1;
   let linesCleared = 0;
-  let gameOver = false;
   let dropInterval = 1000;
-  let lastDropTime = 0;
+  let dropTimer = null;
   let isPaused = false;
-  let animationFrameId = null;
+  let gameOver = false;
 
-  function resetBoard() {
-    board = [];
-    for(let r=0; r<ROWS; r++) {
-      board.push(new Array(COLS).fill(0));
-    }
+  // วาดบล็อก
+  function drawBlock(x, y, colorIndex, ctxObj) {
+    ctxObj.fillStyle = colors[colorIndex];
+    ctxObj.strokeStyle = 'black';
+    ctxObj.lineWidth = 1;
+    ctxObj.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
+    ctxObj.strokeRect(x * blockSize, y * blockSize, blockSize, blockSize);
   }
 
-  function randomPiece() {
-    const id = Math.floor(Math.random() * (SHAPES.length - 1)) + 1;
-    return {
-      id: id,
-      shape: SHAPES[id],
-      color: COLORS[id],
-      x: Math.floor(COLS/2) - Math.ceil(SHAPES[id][0].length/2),
-      y: 0
-    };
-  }
-
-  function drawBlock(x, y, color, context=ctx) {
-    context.fillStyle = color;
-    context.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE-1, BLOCK_SIZE-1);
-    context.strokeStyle = 'rgba(255,255,255,0.1)';
-    context.strokeRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE-1, BLOCK_SIZE-1);
-  }
-
+  // วาดบอร์ด
   function drawBoard() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    for(let r=0; r<ROWS; r++) {
-      for(let c=0; c<COLS; c++) {
-        if(board[r][c]) {
-          drawBlock(c, r, COLORS[board[r][c]]);
+    for(let y=0; y<gridHeight; y++) {
+      for(let x=0; x<gridWidth; x++) {
+        if(board[y][x]) {
+          drawBlock(x, y, board[y][x], ctx);
         }
       }
     }
   }
 
-  function drawPiece(piece, context=ctx) {
-    piece.shape.forEach((row, y) => {
-      row.forEach((value, x) => {
-        if(value) {
-          drawBlock(piece.x + x, piece.y + y, piece.color, context);
+  // วาดบล็อกปัจจุบัน
+  function drawCurrent() {
+    for(let y=0; y<currentShape.length; y++) {
+      for(let x=0; x<currentShape[y].length; x++) {
+        if(currentShape[y][x]) {
+          drawBlock(currentX+x, currentY+y, currentShape[y][x], ctx);
         }
-      });
-    });
+      }
+    }
   }
 
-  function drawNextPiece() {
+  // วาดบล็อกถัดไป
+  function drawNext() {
     nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
-    if(!nextPiece) return;
-    nextPiece.shape.forEach((row, y) => {
-      row.forEach((value, x) => {
-        if(value) {
-          nextCtx.fillStyle = nextPiece.color;
-          const size = nextCanvas.width / 4;
-          nextCtx.fillRect(x * size + 5, y * size + 5, size - 4, size - 4);
-          nextCtx.strokeStyle = 'rgba(255,255,255,0.2)';
-          nextCtx.strokeRect(x * size + 5, y * size + 5, size - 4, size - 4);
+    for(let y=0; y<nextShape.length; y++) {
+      for(let x=0; x<nextShape[y].length; x++) {
+        if(nextShape[y][x]) {
+          drawBlock(x, y, nextShape[y][x], nextCtx);
         }
-      });
-    });
+      }
+    }
   }
 
-  function collides(piece, board, offsetX, offsetY) {
-    for(let y=0; y < piece.shape.length; y++) {
-      for(let x=0; x < piece.shape[y].length; x++) {
-        if(piece.shape[y][x]) {
-          const newX = piece.x + x + offsetX;
-          const newY = piece.y + y + offsetY;
-          if(newX < 0 || newX >= COLS || newY >= ROWS) return true;
-          if(newY >= 0 && board[newY][newX]) return true;
+  // ตรวจสอบชน
+  function collide(shape, x, y) {
+    for(let i=0; i<shape.length; i++) {
+      for(let j=0; j<shape[i].length; j++) {
+        if(shape[i][j]) {
+          let newX = x + j;
+          let newY = y + i;
+          if(newX<0 || newX>=gridWidth || newY>=gridHeight) return true;
+          if(newY>=0 && board[newY][newX]) return true;
         }
       }
     }
     return false;
   }
 
-  function mergePiece(piece, board) {
-    piece.shape.forEach((row, y) => {
-      row.forEach((value, x) => {
-        if(value && piece.y + y >= 0) {
-          board[piece.y + y][piece.x + x] = piece.id;
+  // วางบล็อกบนบอร์ด
+  function placeShape() {
+    for(let y=0; y<currentShape.length; y++) {
+      for(let x=0; x<currentShape[y].length; x++) {
+        if(currentShape[y][x]) {
+          if(currentY+y>=0) board[currentY+y][currentX+x] = currentShape[y][x];
         }
-      });
-    });
-  }
-
-  function rotate(piece) {
-    const newShape = [];
-    const rows = piece.shape.length;
-    const cols = piece.shape[0].length;
-    for(let x=0; x<cols; x++) {
-      newShape[x] = [];
-      for(let y=rows-1; y>=0; y--) {
-        newShape[x][rows - 1 - y] = piece.shape[y][x];
       }
     }
-    return newShape;
   }
 
-  function rotatePiece() {
-    if(isPaused || gameOver) return;
-    const rotatedShape = rotate(currentPiece);
-    const originalShape = currentPiece.shape;
-    currentPiece.shape = rotatedShape;
-    if(collides(currentPiece, board, 0, 0)) {
-      currentPiece.shape = originalShape; // คืนรูปเดิมถ้าชน
-      playSound('fail');
-    } else {
-      playSound('rotate');
-    }
-    draw();
-  }
-
-  function movePiece(offsetX, offsetY) {
-    if(isPaused || gameOver) return;
-    if(!collides(currentPiece, board, offsetX, offsetY)) {
-      currentPiece.x += offsetX;
-      currentPiece.y += offsetY;
-      playSound(offsetY === 1 ? 'down' : 'move');
-      draw();
-      return true;
-    } else {
-      if(offsetY === 1) { // ถ้าบล็อกตกแล้วชน
-        lockPiece();
-      }
-      return false;
-    }
-  }
-
-  function lockPiece() {
-    mergePiece(currentPiece, board);
-    clearLines();
-    spawnNextPiece();
-    if(collides(currentPiece, board, 0, 0)) {
-      // เกมจบ
-      gameOver = true;
-      showGameOver();
-      playSound('gameover');
-    }
-  }
-
+  // ลบแถวที่เต็ม
   function clearLines() {
     let lines = 0;
-    for(let y=ROWS-1; y>=0; y--) {
+    for(let y=gridHeight-1; y>=0; y--) {
       if(board[y].every(cell => cell !== 0)) {
+        board.splice(y, 1);
+        board.unshift(new Array(gridWidth).fill(0));
         lines++;
-        board.splice(y,1);
-        board.unshift(new Array(COLS).fill(0));
-        y++; // ตรวจซ้ำบรรทัดใหม่ที่เลื่อนลงมา
+        y++;
       }
     }
     if(lines > 0) {
-      linesCleared += lines;
-      score += lines * lines * 100;
-      level = Math.min(10, Math.floor(linesCleared / 10) + 1);
-      dropInterval = 1000 - (level - 1) * 80;
       playSound('clear');
-      draw();
+      score += lines * 100 * level;
+      linesCleared += lines;
+      if(linesCleared >= level * 5) {
+        level++;
+        dropInterval *= 0.8;
+        restartDropTimer();
+      }
       updateScoreLevel();
     }
   }
 
-  function spawnNextPiece() {
-    currentPiece = nextPiece;
-    currentX = currentPiece.x;
-    currentY = currentPiece.y;
-    nextPiece = randomPiece();
-    drawNextPiece();
-  }
-
+  // อัปเดตคะแนนและระดับ
   function updateScoreLevel() {
-    scoreEl.textContent = score;
-    levelEl.textContent = level;
+    document.getElementById('score').textContent = score;
+    document.getElementById('level').textContent = level;
   }
 
-  function draw() {
-    drawBoard();
-    drawPiece(currentPiece);
-  }
-
-  function gameLoop(timestamp) {
-    if(gameOver || isPaused) {
-      animationFrameId = requestAnimationFrame(gameLoop);
-      return;
-    }
-    if(!lastDropTime) lastDropTime = timestamp;
-    const delta = timestamp - lastDropTime;
-    if(delta > dropInterval) {
-      if(!movePiece(0,1)) {
-        // ไม่สามารถเลื่อนลงได้
-      }
-      lastDropTime = timestamp;
-    }
-    draw();
-    animationFrameId = requestAnimationFrame(gameLoop);
-  }
-
+  // เริ่มเกม
   function startGame() {
-    resetBoard();
+    board = [];
+    for(let y=0; y<gridHeight; y++) {
+      board[y] = new Array(gridWidth).fill(0);
+    }
+    currentShape = randomShape();
+    nextShape = randomShape();
+    currentX = 3;
+    currentY = -2;
     score = 0;
     level = 1;
     linesCleared = 0;
     dropInterval = 1000;
-    lastDropTime = 0;
-    gameOver = false;
     isPaused = false;
-    currentPiece = randomPiece();
-    nextPiece = randomPiece();
-    drawNextPiece();
+    gameOver = false;
     updateScoreLevel();
-    menuScreen.style.display = 'none';
-    gameOverlay.style.display = 'none';
-    scoreLevelDiv.style.display = 'block';
-    gameContainer.style.display = 'flex';
-    controls.style.display = 'flex';
-    pauseBtn.style.display = 'inline-block';
-    resumeBtn.style.display = 'none';
-    animationFrameId = requestAnimationFrame(gameLoop);
+    drawBoard();
+    drawNext();
+    dropTimer = setTimeout(drop, dropInterval);
+    document.getElementById('menuScreen').style.display = 'none';
+    document.getElementById('gameOverlay').style.display = 'none';
+    document.getElementById('scoreLevel').style.display = 'block';
+    document.getElementById('gameContainer').style.display = 'flex';
+    document.getElementById('controls').style.display = 'flex';
+    document.getElementById('pauseBtn').style.display = 'inline-block';
+    document.getElementById('resumeBtn').style.display = 'none';
     playSound('start');
   }
 
-  function showGameOver() {
-    gameOverlay.style.display = 'flex';
+  // หยุดเกม
+  function endGame() {
+    clearTimeout(dropTimer);
+    gameOver = true;
+    document.getElementById('gameOverlay').style.display = 'flex';
   }
 
-  function pauseGame() {
-    if(gameOver) return;
+  // ตกบล็อกลง
+  function drop() {
+    if(isPaused || gameOver) return;
+    if(!collide(currentShape, currentX, currentY + 1)) {
+      currentY++;
+      playSound('down');
+    } else {
+      placeShape();
+      clearLines();
+      currentShape = nextShape;
+      nextShape = randomShape();
+      currentX = 3;
+      currentY = -2;
+      if(collide(currentShape, currentX, currentY)) {
+        endGame();
+      }
+      drawNext();
+      playSound('place');
+    }
+    drawBoard();
+    drawCurrent();
+    dropTimer = setTimeout(drop, dropInterval);
+  }
+
+  // รีสตาร์ทตัวจับเวลา
+  function restartDropTimer() {
+    clearTimeout(dropTimer);
+    if(!gameOver && !isPaused) {
+      dropTimer = setTimeout(drop, dropInterval);
+    }
+  }
+
+  // ย้ายบล็อก
+  function move(dx) {
+    if(isPaused || gameOver) return;
+    if(!collide(currentShape, currentX + dx, currentY)) {
+      currentX += dx;
+      drawBoard();
+      drawCurrent();
+      playSound('move');
+    }
+  }
+
+  // หมุนบล็อก
+  function rotateShape() {
+    if(isPaused || gameOver) return;
+    const rotated = rotate(currentShape);
+    if(!collide(rotated, currentX, currentY)) {
+      currentShape = rotated;
+      drawBoard();
+      drawCurrent();
+      playSound('rotate');
+    }
+  }
+
+  // กดปุ่ม
+  document.getElementById('leftBtn').addEventListener('click', () => move(-1));
+  document.getElementById('rightBtn').addEventListener('click', () => move(1));
+  document.getElementById('downBtn').addEventListener('click', () => drop());
+  document.getElementById('rotateBtn').addEventListener('click', rotateShape);
+
+  // เริ่มเกมใหม่
+  document.getElementById('startBtn').addEventListener('click', startGame);
+  document.getElementById('restartBtn').addEventListener('click', startGame);
+
+  // หยุดและเล่นต่อเกม
+  document.getElementById('pauseBtn').addEventListener('click', () => {
     isPaused = true;
-    pauseBtn.style.display = 'none';
-    resumeBtn.style.display = 'inline-block';
-    playSound('pause');
-  }
-
-  function resumeGame() {
-    if(gameOver) return;
+    clearTimeout(dropTimer);
+    document.getElementById('pauseBtn').style.display = 'none';
+    document.getElementById('resumeBtn').style.display = 'inline-block';
+  });
+  document.getElementById('resumeBtn').addEventListener('click', () => {
     isPaused = false;
-    lastDropTime = performance.now();
-    pauseBtn.style.display = 'inline-block';
-    resumeBtn.style.display = 'none';
-    playSound('resume');
-  }
-
-  // การเล่นเสียง (เปลี่ยนตามไฟล์จริงถ้ามี)
-  const sounds = {
-    move: new Audio('sounds/move.wav'),
-    rotate: new Audio('sounds/rotate.wav'),
-    down: new Audio('sounds/down.wav'),
-    clear: new Audio('sounds/clear.wav'),
-    fail: new Audio(),
-    start: new Audio('sounds/start.wav'),
-    pause: new Audio(),
-    resume: new Audio(),
-    gameover: new Audio('sounds/gameover.wav'),
-  };
-  // ตัวอย่าง: ใส่ src ไฟล์เสียงที่มีจริงได้ เช่น
-  // sounds.move.src = 'sounds/move.mp3';
-  // sounds.move.load();
-
-  function playSound(name) {
-    const sound = sounds[name];
-    if(sound && !sound.paused) {
-      // ถ้าเล่นซ้อน ๆ ให้หยุดก่อนเล่นใหม่
-      sound.pause();
-      sound.currentTime = 0;
-    }
-    if(sound) {
-      sound.play().catch(() => {});
-    }
-  }
-
-  // Event listeners ปุ่มควบคุม
-  startBtn.addEventListener('click', startGame);
-  restartBtn.addEventListener('click', () => {
-    gameOverlay.style.display = 'none';
-    startGame();
+    document.getElementById('resumeBtn').style.display = 'none';
+    document.getElementById('pauseBtn').style.display = 'inline-block';
+    dropTimer = setTimeout(drop, dropInterval);
   });
 
-  pauseBtn.addEventListener('click', pauseGame);
-  resumeBtn.addEventListener('click', resumeGame);
+  // แสดงบล็อกและบอร์ดครั้งแรก
+  drawBoard();
+  drawNext();
 
-  document.getElementById('leftBtn').addEventListener('click', () => movePiece(-1,0));
-  document.getElementById('rightBtn').addEventListener('click', () => movePiece(1,0));
-  document.getElementById('rotateBtn').addEventListener('click', rotatePiece);
-  document.getElementById('downBtn').addEventListener('click', () => movePiece(0,1));
+  // --------- โค้ดเสียง ------------
 
-  // ป้องกันการ scroll บนมือถือขณะเล่น (touchmove)
-  window.addEventListener('touchmove', function(e){
-    if(controls.contains(e.target)) e.preventDefault();
-  }, { passive:false });
+  const sounds = {
+    start: new Audio('https://freesound.org/data/previews/341/341695_5260879-lq.mp3'),
+    move: new Audio('https://freesound.org/data/previews/170/170144_2437358-lq.mp3'),
+    rotate: new Audio('https://freesound.org/data/previews/83/83150_102265-lq.mp3'),
+    down: new Audio('https://freesound.org/data/previews/138/138576_2398408-lq.mp3'),
+    place: new Audio('https://freesound.org/data/previews/13/13131_5150-lq.mp3'),
+    clear: new Audio('https://freesound.org/data/previews/58/58784_634166-lq.mp3'),
+  };
 
+  // ปรับเสียงไม่ดังเกินไป
+  for (const key in sounds) {
+    sounds[key].volume = 0.15;
+  }
+
+  function playSound(name) {
+    if(sounds[name]) {
+      sounds[name].currentTime = 0;
+      sounds[name].play();
+    }
+  }
 </script>
 
 </body>

@@ -31,7 +31,7 @@
       z-index: 999;
     }
 
-    #startBtn, #restartBtn {
+    #startBtn, #restartBtn, #pauseBtn, #resumeBtn {
       margin-top: 20px;
       padding: 15px 30px;
       font-size: 1.4em;
@@ -41,7 +41,7 @@
       color: black;
       cursor: pointer;
     }
-    #startBtn:hover, #restartBtn:hover {
+    #startBtn:hover, #restartBtn:hover, #pauseBtn:hover, #resumeBtn:hover {
       background: #3f3;
     }
 
@@ -128,6 +128,8 @@
     <button id="rightBtn">▶️</button>
     <button id="downBtn">⬇️</button>
     <button id="rotateBtn">🔄</button>
+    <button id="pauseBtn">⏸️</button>
+    <button id="resumeBtn" style="display:none;">▶️</button>
   </div>
 
   <div id="gameOverlay" style="display:none;">
@@ -169,11 +171,24 @@
     const restartBtn = document.getElementById('restartBtn');
     const startBtn = document.getElementById('startBtn');
     const menu = document.getElementById('menuScreen');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const resumeBtn = document.getElementById('resumeBtn');
 
     const COLS = 10, ROWS = 20, BLOCK = 30;
     const COLORS = [null, '#FF0D72', '#0DC2FF', '#0DFF72', '#F538FF', '#FF8E0D', '#FFE138', '#3877FF'];
-    const SHAPES = [[], [[0,1,0],[1,1,1]], [[1],[1],[1],[1]], [[0,1,1],[1,1,0]], [[1,1,0],[0,1,1]], [[1,0,0],[1,1,1]], [[1,1],[1,1]], [[0,0,1],[1,1,1]]];
+    const SHAPES = [
+      [],
+      [[0,1,0],[1,1,1]],       // T
+      [[1],[1],[1],[1]],       // I
+      [[0,1,1],[1,1,0]],       // S
+      [[1,1,0],[0,1,1]],       // Z
+      [[1,0,0],[1,1,1]],       // J
+      [[1,1],[1,1]],           // O
+      [[0,0,1],[1,1,1]]        // L
+    ];
+
     let board, current, next, dropCounter, dropInterval, lastTime, score, level, linesCleared, gameOver;
+    let paused = false;
 
     function reset() {
       board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
@@ -186,6 +201,9 @@
       current = randomPiece();
       next = randomPiece();
       overlay.style.display = 'none';
+      paused = false;
+      pauseBtn.style.display = 'inline-block';
+      resumeBtn.style.display = 'none';
       updateUI();
     }
 
@@ -306,13 +324,16 @@
           play('gameover');
           overlay.style.display = 'flex';
           gameOver = true;
+          paused = true;
+          pauseBtn.style.display = 'none';
+          resumeBtn.style.display = 'none';
         }
       }
       dropCounter = 0;
     }
 
     function update(t = 0) {
-      if (gameOver) return;
+      if (gameOver || paused) return;
       const dt = t - lastTime;
       lastTime = t;
       dropCounter += dt;
@@ -322,36 +343,70 @@
     }
 
     function move(dx) {
+      if (paused || gameOver) return;
       current.x += dx;
       if (collide(current)) current.x -= dx;
       else play('move');
     }
 
-    function rotate() {
-      const shape = current.shape;
-      const N = shape.length;
-      const newShape = Array.from({ length: N }, (_, y) => shape.map(row => row[N - 1 - y]));
-      const old = current.shape;
-      current.shape = newShape;
-      if (collide(current)) current.shape = old;
-      else play('rotate');
+    function rotateMatrix(matrix) {
+      const N = matrix.length;
+      const rotated = Array.from({ length: N }, () => Array(N).fill(0));
+      for (let y = 0; y < N; y++) {
+        for (let x = 0; x < N; x++) {
+          rotated[x][N - 1 - y] = matrix[y][x];
+        }
+      }
+      return rotated;
     }
 
-    document.getElementById('leftBtn').onclick = () => move(-1);
-    document.getElementById('rightBtn').onclick = () => move(1);
-    document.getElementById('downBtn').onclick = () => drop();
-    document.getElementById('rotateBtn').onclick = () => rotate();
-    restartBtn.onclick = () => {
+    function rotate() {
+      if (paused || gameOver) return;
+      const oldShape = current.shape;
+      const newShape = rotateMatrix(oldShape);
+      current.shape = newShape;
+      if (collide(current)) {
+        current.shape = oldShape;
+      } else {
+        play('rotate');
+      }
+    }
+
+    // Controls event listeners
+    document.getElementById('leftBtn').addEventListener('click', () => move(-1));
+    document.getElementById('rightBtn').addEventListener('click', () => move(1));
+    document.getElementById('downBtn').addEventListener('click', () => {
+      if (paused || gameOver) return;
+      drop();
+    });
+    document.getElementById('rotateBtn').addEventListener('click', rotate);
+
+    pauseBtn.addEventListener('click', () => {
+      paused = true;
+      pauseBtn.style.display = 'none';
+      resumeBtn.style.display = 'inline-block';
+    });
+
+    resumeBtn.addEventListener('click', () => {
+      paused = false;
+      lastTime = performance.now();
+      pauseBtn.style.display = 'inline-block';
+      resumeBtn.style.display = 'none';
+      update();
+    });
+
+    restartBtn.addEventListener('click', () => {
       reset();
       gameOver = false;
       update();
-    };
-    startBtn.onclick = () => {
+    });
+
+    startBtn.addEventListener('click', () => {
       menu.style.display = 'none';
       reset();
-      drawNext();
       update();
-    };
+    });
+
   })();
   </script>
 </body>

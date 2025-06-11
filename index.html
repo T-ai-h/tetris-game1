@@ -68,11 +68,20 @@
     box-shadow: none;
   }
   #scoreLevel {
-    margin: 12px 0;
-    font-size: 1.2em;
-    text-align: center;
-    text-shadow: 0 0 8px #fff;
-  }
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5em 1em;
+  font-size: 1.1em;
+  width: 100%;
+  box-sizing: border-box;
+}
+#scoreLevel button {
+  font-size: 0.9em;
+  margin-left: 0.5em;
+  padding: 0.3em 0.8em;
+}
+
   #gameContainer {
     display: flex;
     justify-content: center;
@@ -208,9 +217,16 @@
   <button id="restartBtn">เล่นใหม่</button>
 </div>
 
-<div id="scoreLevel" style="display:none;">
-  คะแนน: <span id="score">0</span> | ระดับ: <span id="level">1</span>
+<div id="scoreLevel">
+  <div>
+    คะแนน: <span id="score">0</span> | เลเวล: <span id="level">1</span>
+  </div>
+  <div>
+    <button id="pauseBtn">⏸️ หยุด</button>
+    <button id="resumeBtn" style="display:none;">▶️ เล่นต่อ</button>
+  </div>
 </div>
+
 
 <div id="gameContainer" style="display:none;">
   <canvas id="game" width="300" height="600"></canvas>

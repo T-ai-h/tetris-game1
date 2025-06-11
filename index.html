@@ -373,8 +373,8 @@
         linesCleared += lines;
 
         const oldLevel = level;
-        level = Math.floor(linesCleared / 10) + 1;
-        dropInterval = Math.max(100, 800 - (level - 1) * 50);
+        level = Math.floor(linesCleared / 5) + 1;
+        dropInterval = Math.max(100, 500 - (level - 1) * 50);
         updateUI();
 
         if (level > oldLevel) {

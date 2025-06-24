@@ -9,62 +9,203 @@
   body {
     margin: 0;
     font-family: 'Press Start 2P', cursive;
-    background: #000;
+    background: linear-gradient(to bottom, #1a1a1a, #000); /* พื้นหลังไล่เฉด */
     color: #fff;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
     min-height: 100vh;
-    padding: 10px;
+    padding: 15px; /* เพิ่ม padding รอบด้าน */
+    box-sizing: border-box;
+    overflow: hidden; /* ป้องกันการ scroll โดยไม่ตั้งใจ */
   }
 
+  h1 {
+    text-shadow: 3px 3px 0px rgba(0,0,0,0.5); /* เงาชัดเจนขึ้น */
+    color: #fff;
+    letter-spacing: 2px;
+  }
+
+  /* --- Menu & Game Over Screens --- */
   #menuScreen, #gameOverlay {
     text-align: center;
-    margin-top: 40px;
-  }
-
-  #topUI {
+    margin-top: 20px;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.7); /* พื้นหลังโปร่งใสเล็กน้อย */
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.5); /* เงาสีฟ้าเรืองแสง */
+  }
+
+  #gameOverlay div {
+    margin-bottom: 20px;
+    font-size: 1.3em;
+    color: #ff4d4d; /* สีแดงสด */
+    text-shadow: 1px 1px 0px #800;
+  }
+
+  /* --- Top UI (Score, Level, Next Piece) --- */
+  #topUI {
+    display: none; /* ซ่อนไว้ก่อน */
+    flex-direction: row;
+    align-items: flex-end; /* จัดให้ next piece ชิดด้านล่างของ flex item */
+    justify-content: space-around; /* กระจายช่องไฟ */
     gap: 20px;
-    margin: 10px 0;
+    margin: 15px 0;
+    width: 100%;
+    max-width: 380px; /* จำกัดความกว้างรวม */
+    padding: 10px;
+    box-sizing: border-box;
   }
 
   #scoreLevel {
-    font-size: 12px;
-    line-height: 1.5;
-    text-align: center;
+    font-size: 14px;
+    line-height: 1.6;
+    text-align: left;
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 2px solid #555;
+    box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.2);
+    min-width: 120px; /* ให้มีพื้นที่เพียงพอ */
   }
 
   #next {
-    background-color: #111;
-    border: 2px solid #fff;
-    width: 80px;
-    height: 80px;
+    background-color: #222;
+    border: 3px solid #777; /* ขอบหนาขึ้น */
+    width: 90px; /* ขนาดใหญ่ขึ้นเล็กน้อย */
+    height: 90px;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3), inset 0 0 8px rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
   }
 
+  /* --- Game Canvas --- */
   #gameContainer {
-    margin-top: 10px;
-  }
-  #controls {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 15px;
-    padding: 10px;
+    display: none; /* ซ่อนไว้ก่อน */
+    /* margin-top: 10px; */ /* เอาออกเพราะถูกควบคุมด้วย JS */
+    border: 5px solid #fff; /* ขอบหนาและชัดเจน */
+    box-shadow: 0 0 25px rgba(0, 255, 255, 0.6); /* เงาสีฟ้าเรืองแสงใหญ่ขึ้น */
+    background-color: #0d0d0d; /* สีพื้นหลังเกม */
+    border-radius: 8px;
+    overflow: hidden; /* เพื่อให้บล็อกไม่ล้นขอบ */
   }
 
-  #controls button {
-    width: 22vw;
-    max-width: 70px;
-    height: 50px;
-    font-size: 18px;
-    border-radius: 10px;
+  #game {
+    background-color: #1a1a1a;
   }
+
+  /* --- Controls --- */
+  #controls {
+    display: none; /* ซ่อนไว้ก่อน */
+    grid-template-columns: repeat(3, 1fr); /* 3 คอลัมน์ */
+    grid-template-rows: repeat(3, auto); /* 3 แถว, ขนาดตามเนื้อหา */
+    gap: 12px; /* ลดระยะห่างเล็กน้อย */
+    margin-top: 25px;
+    padding: 15px;
+    max-width: 380px; /* จำกัดความกว้างของ grid */
+    box-sizing: border-box;
+  }
+
+  #controls button, #menuScreen button, #gameOverlay button {
+    width: 100%; /* ปุ่มเต็มความกว้างใน grid cell */
+    height: 60px; /* เพิ่มความสูง */
+    font-family: 'Press Start 2P', cursive;
+    font-size: 20px; /* ขนาดตัวอักษรใหญ่ขึ้น */
+    background-color: #007bff; /* สีน้ำเงินสดใส */
+    color: #fff;
+    border: none;
+    border-radius: 8px; /* มุมโค้งมนเล็กน้อย */
+    box-shadow: 0 5px 0px #0056b3; /* เงาด้านล่างปุ่ม */
+    cursor: pointer;
+    transition: all 0.1s ease; /* เปลี่ยนแปลงนุ่มนวลขึ้น */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    text-shadow: 1px 1px 0px rgba(0,0,0,0.3);
+  }
+
+  #controls button:active, #menuScreen button:active, #gameOverlay button:active {
+    background-color: #0056b3; /* สีเข้มขึ้นเมื่อกด */
+    transform: translateY(3px); /* เลื่อนลงเล็กน้อยเมื่อกด */
+    box-shadow: 0 2px 0px #003f8e; /* เงาเล็กลงเมื่อกด */
+  }
+
+  /* Grid Area สำหรับปุ่มควบคุม */
+  #pauseBtn, #resumeBtn {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  #rotateBtn {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  #hardDropBtn {
+    grid-column: 3;
+    grid-row: 1;
+  }
+  #leftBtn {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  #downBtn {
+    grid-column: 2;
+    grid-row: 2;
+  }
+  #rightBtn {
+    grid-column: 3;
+    grid-row: 2;
+  }
+
+  /* ทำให้ปุ่ม Hard Drop หรือปุ่มอื่นๆ ที่คุณต้องการอยู่แถวเดียวกับ pause/resume */
+  /* หรือถ้าต้องการปุ่ม Hard Drop แถวล่างสุดเต็มความกว้าง */
+  #hardDropBtn.full-width { /* เพิ่ม class นี้ให้ปุ่ม Hard Drop ถ้าอยากให้เต็มความกว้าง */
+    grid-column: 1 / span 3;
+    grid-row: 3;
+    max-width: none;
+  }
+
+  /* Responsive Adjustments */
+  @media (max-width: 450px) {
+    body {
+      padding: 10px;
+    }
+    #topUI {
+      gap: 15px;
+      margin: 10px 0;
+    }
+    #scoreLevel {
+      font-size: 12px;
+      padding: 8px 12px;
+    }
+    #next {
+      width: 80px;
+      height: 80px;
+    }
+    #controls {
+      gap: 10px;
+      padding: 10px;
+    }
+    #controls button, #menuScreen button, #gameOverlay button {
+      height: 55px;
+      font-size: 18px;
+    }
+  }
+
+  @media (max-width: 320px) {
+    #topUI {
+      flex-direction: column; /* บนจอเล็กมากให้ stack กัน */
+      align-items: center;
+    }
+    #controls {
+      max-width: 280px;
+    }
+  }
+
 </style>
 </head>
 <body>
@@ -75,8 +216,9 @@
 </div>
 
 <div id="gameOverlay" style="display:none;">
-    <div>เกมจบ!</div>
-    <div>คะแนนสุดท้าย: <span id="finalScore">0</span></div> <button id="restartBtn">เล่นใหม่</button>
+  <div>เกมจบ!</div>
+  <div>คะแนนสุดท้าย: <span id="finalScore">0</span></div>
+  <button id="restartBtn">เล่นใหม่</button>
 </div>
 
 <div id="topUI" style="display:none;">
@@ -84,7 +226,7 @@
     <div>คะแนน: <span id="score">0</span></div>
     <div>ระดับ: <span id="level">1</span></div>
   </div>
-  <canvas id="next" width="80" height="80"></canvas>
+  <canvas id="next" width="90" height="90"></canvas>
 </div>
 
 <div id="gameContainer" style="display:none;">
@@ -92,30 +234,33 @@
 </div>
 
 <div id="controls" style="display:none;">
-  <button id="leftBtn">←</button>
-  <button id="rightBtn">→</button>
+  <button id="pauseBtn" title="Pause" aria-label="Pause">⏸️</button>
   <button id="rotateBtn">⟳</button>
+  <button id="hardDropBtn">⚡</button>
+  <button id="leftBtn">←</button>
   <button id="downBtn">↓</button>
- <button id="pauseBtn" title="Pause" aria-label="Pause">⏸️</button>
-<button id="resumeBtn" title="Play" aria-label="Play" style="display:none;">▶️</button>
+  <button id="rightBtn">→</button>
+  <button id="resumeBtn" title="Play" aria-label="Play" style="display:none;">▶️</button>
 </div>
 
 <script>
-   const canvas = document.getElementById('game');
+  const canvas = document.getElementById('game');
   const ctx = canvas.getContext('2d');
   const nextCanvas = document.getElementById('next');
   const nextCtx = nextCanvas.getContext('2d');
   const scoreEl = document.getElementById('score');
   const levelEl = document.getElementById('level');
+  const finalScoreEl = document.getElementById('finalScore');
   const menuScreen = document.getElementById('menuScreen');
   const gameOverlay = document.getElementById('gameOverlay');
   const startBtn = document.getElementById('startBtn');
   const restartBtn = document.getElementById('restartBtn');
   const pauseBtn = document.getElementById('pauseBtn');
   const resumeBtn = document.getElementById('resumeBtn');
-  const scoreLevelDiv = document.getElementById('scoreLevel');
+  const topUIDiv = document.getElementById('topUI'); // เปลี่ยนชื่อตัวแปร
   const gameContainer = document.getElementById('gameContainer');
   const controls = document.getElementById('controls');
+  const hardDropBtn = document.getElementById('hardDropBtn');
 
   const ROWS = 20;
   const COLS = 10;
@@ -134,19 +279,17 @@
   ];
   const COLORS = [
     null,
-    '#00ffff', // I
-    '#ff0000', // Z
-    '#00ff00', // S
-    '#aa00ff', // T
-    '#ffff00', // O
-    '#ff8800', // L
-    '#0000ff', // J
+    '#00ffff', // I - Cyan
+    '#ff0000', // Z - Red
+    '#00ff00', // S - Green
+    '#aa00ff', // T - Purple
+    '#ffff00', // O - Yellow
+    '#ff8800', // L - Orange
+    '#0000ff', // J - Blue
   ];
 
   let board = [];
   let currentPiece = null;
-  let currentX = 0;
-  let currentY = 0;
   let nextPiece = null;
   let score = 0;
   let level = 1;
@@ -175,11 +318,13 @@
     };
   }
 
-  function drawBlock(x, y, color, context=ctx) {
+  function drawBlock(x, y, color, context=ctx, alpha = 1) {
     context.fillStyle = color;
-    context.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE-1, BLOCK_SIZE-1);
-    context.strokeStyle = 'rgba(255,255,255,0.1)';
-    context.strokeRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE-1, BLOCK_SIZE-1);
+    context.globalAlpha = alpha;
+    context.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE - 1, BLOCK_SIZE - 1);
+    context.strokeStyle = 'rgba(255,255,255,0.15)'; /* ขอบบล็อก */
+    context.strokeRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE - 1, BLOCK_SIZE - 1);
+    context.globalAlpha = 1;
   }
 
   function drawBoard() {
@@ -193,11 +338,11 @@
     }
   }
 
-  function drawPiece(piece, context=ctx) {
+  function drawPiece(piece, context=ctx, alpha = 1) {
     piece.shape.forEach((row, y) => {
       row.forEach((value, x) => {
         if(value) {
-          drawBlock(piece.x + x, piece.y + y, piece.color, context);
+          drawBlock(piece.x + x, piece.y + y, piece.color, context, alpha);
         }
       });
     });
@@ -206,14 +351,22 @@
   function drawNextPiece() {
     nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
     if(!nextPiece) return;
+
+    // คำนวณ offset เพื่อจัดตำแหน่งบล็อกให้อยู่ตรงกลาง nextCanvas
+    const pieceWidth = nextPiece.shape[0].length;
+    const pieceHeight = nextPiece.shape.length;
+    const blockSizeNext = nextCanvas.width / 4; // ขนาดบล็อกใน nextCanvas (เพื่อให้พอดี 4x4)
+
+    let startX = (nextCanvas.width - pieceWidth * blockSizeNext) / 2;
+    let startY = (nextCanvas.height - pieceHeight * blockSizeNext) / 2;
+
     nextPiece.shape.forEach((row, y) => {
       row.forEach((value, x) => {
         if(value) {
           nextCtx.fillStyle = nextPiece.color;
-          const size = nextCanvas.width / 4;
-          nextCtx.fillRect(x * size + 5, y * size + 5, size - 4, size - 4);
+          nextCtx.fillRect(startX + x * blockSizeNext, startY + y * blockSizeNext, blockSizeNext - 2, blockSizeNext - 2);
           nextCtx.strokeStyle = 'rgba(255,255,255,0.2)';
-          nextCtx.strokeRect(x * size + 5, y * size + 5, size - 4, size - 4);
+          nextCtx.strokeRect(startX + x * blockSizeNext, startY + y * blockSizeNext, blockSizeNext - 2, blockSizeNext - 2);
         }
       });
     });
@@ -261,11 +414,33 @@
     const rotatedShape = rotate(currentPiece);
     const originalShape = currentPiece.shape;
     currentPiece.shape = rotatedShape;
-    if(collides(currentPiece, board, 0, 0)) {
-      currentPiece.shape = originalShape; // คืนรูปเดิมถ้าชน
-      playSound('fail');
+
+    // Wall Kick - ตรวจสอบการชนและพยายามขยับเล็กน้อย
+    const kicks = [
+        [0, 0], // No kick
+        [-1, 0], // Kick left
+        [1, 0],  // Kick right
+        [0, -1], // Kick up
+        [-2, 0], // Double kick left
+        [2, 0]   // Double kick right
+    ];
+
+    let rotatedSuccessfully = false;
+    for (let i = 0; i < kicks.length; i++) {
+        const [offsetX, offsetY] = kicks[i];
+        if (!collides(currentPiece, board, offsetX, offsetY)) {
+            currentPiece.x += offsetX;
+            currentPiece.y += offsetY;
+            rotatedSuccessfully = true;
+            break;
+        }
+    }
+
+    if (!rotatedSuccessfully) {
+        currentPiece.shape = originalShape; // Revert if all kicks fail
+        playSound('fail');
     } else {
-      playSound('rotate');
+        playSound('rotate');
     }
     draw();
   }
@@ -275,15 +450,29 @@
     if(!collides(currentPiece, board, offsetX, offsetY)) {
       currentPiece.x += offsetX;
       currentPiece.y += offsetY;
-      playSound(offsetY === 1 ? 'down' : 'move');
+      if (offsetY === 1) playSound('down');
+      else if (offsetX !== 0) playSound('move');
       draw();
       return true;
     } else {
-      if(offsetY === 1) { // ถ้าบล็อกตกแล้วชน
+      if(offsetY === 1) { // If piece hits bottom or other blocks
         lockPiece();
       }
       return false;
     }
+  }
+
+  function hardDrop() {
+    if(isPaused || gameOver) return;
+    let linesDropped = 0;
+    while (!collides(currentPiece, board, 0, 1)) {
+      currentPiece.y++;
+      linesDropped++;
+    }
+    score += linesDropped * 2; // Score for hard drop
+    lockPiece();
+    playSound('harddrop');
+    draw();
   }
 
   function lockPiece() {
@@ -291,50 +480,60 @@
     clearLines();
     spawnNextPiece();
     if(collides(currentPiece, board, 0, 0)) {
-      // เกมจบ
       gameOver = true;
       showGameOver();
       playSound('gameover');
+    } else {
+      playSound('lock');
     }
   }
 
-function clearLines() {
-  let lines = 0;
-  outer: for (let y = ROWS - 1; y >= 0; y--) {
-    for (let x = 0; x < COLS; x++) {
-      if (!board[y][x]) continue outer;
+  function clearLines() {
+    let lines = 0;
+    outer: for (let y = ROWS - 1; y >= 0; y--) {
+      for (let x = 0; x < COLS; x++) {
+        if (!board[y][x]) continue outer;
+      }
+      board.splice(y, 1);
+      board.unshift(new Array(COLS).fill(0));
+      lines++;
+      y++;
     }
-    // ถ้าแถวเต็ม
-    board.splice(y, 1); // ลบแถวนั้น
-    board.unshift(new Array(COLS).fill(0)); // เพิ่มแถวว่างด้านบน
-    lines++;
-    y++; // ตรวจแถวเดิมอีกครั้ง (เพราะเลื่อนแถวลงมาแล้ว)
+
+    if (lines > 0) {
+      linesCleared += lines;
+      // Score based on multiple lines cleared
+      switch (lines) {
+        case 1: score += 100 * level; break;
+        case 2: score += 300 * level; break;
+        case 3: score += 500 * level; break;
+        case 4: score += 800 * level; break; // Tetris
+      }
+
+      const newLevel = Math.floor(linesCleared / 10) + 1;
+      if (newLevel !== level) {
+        level = newLevel;
+        dropInterval = Math.max(50, 1000 - (level - 1) * 70); // Min drop interval 50ms
+      }
+
+      scoreEl.textContent = score;
+      levelEl.textContent = level;
+      playSound('clear');
+    }
   }
 
-  if (lines > 0) {
-  linesCleared += lines;
-  score += lines * 100 * level;
-
-  // เพิ่ม level เฉพาะเมื่อเคลียร์ครบ 10 แถว
-  const newLevel = Math.floor(linesCleared / 10) + 1;
-  if (newLevel !== level) {
-    level = newLevel;
-    dropInterval = Math.max(100, 1500 - (level - 1) * 80);
+  function getGhostPiece() {
+    const ghost = { ...currentPiece };
+    while (!collides(ghost, board, 0, 1)) {
+      ghost.y++;
+    }
+    return ghost;
   }
-
-  scoreEl.textContent = score;
-  levelEl.textContent = level;
-  playSound('clear');
-}
-
-}
-
-  
 
   function spawnNextPiece() {
     currentPiece = nextPiece;
-    currentX = currentPiece.x;
-    currentY = currentPiece.y;
+    currentPiece.x = Math.floor(COLS/2) - Math.ceil(currentPiece.shape[0].length/2);
+    currentPiece.y = 0;
     nextPiece = randomPiece();
     drawNextPiece();
   }
@@ -346,7 +545,11 @@ function clearLines() {
 
   function draw() {
     drawBoard();
-    drawPiece(currentPiece);
+    if (!gameOver && !isPaused) {
+      const ghostPiece = getGhostPiece();
+      drawPiece(ghostPiece, ctx, 0.2); // Draw ghost piece with transparency
+      drawPiece(currentPiece);
+    }
   }
 
   function gameLoop(timestamp) {
@@ -357,13 +560,19 @@ function clearLines() {
     if(!lastDropTime) lastDropTime = timestamp;
     const delta = timestamp - lastDropTime;
     if(delta > dropInterval) {
-      if(!movePiece(0,1)) {
-        // ไม่สามารถเลื่อนลงได้
-      }
+      movePiece(0,1);
       lastDropTime = timestamp;
     }
     draw();
     animationFrameId = requestAnimationFrame(gameLoop);
+  }
+
+  function preloadSounds() {
+    for (const key in sounds) {
+      if (sounds[key].src) {
+        sounds[key].load();
+      }
+    }
   }
 
   function startGame() {
@@ -381,25 +590,26 @@ function clearLines() {
     updateScoreLevel();
     menuScreen.style.display = 'none';
     gameOverlay.style.display = 'none';
-    scoreLevelDiv.style.display = 'block';
-    gameContainer.style.display = 'flex';
-    controls.style.display = 'flex';
-    pauseBtn.style.display = 'inline-block';
+    topUIDiv.style.display = 'flex'; // แก้ไขตรงนี้
+    gameContainer.style.display = 'block'; // แก้ไขตรงนี้
+    controls.style.display = 'grid';
+    pauseBtn.style.display = 'inline-flex';
     resumeBtn.style.display = 'none';
+    preloadSounds();
     animationFrameId = requestAnimationFrame(gameLoop);
     playSound('start');
   }
 
   function showGameOver() {
     gameOverlay.style.display = 'flex';
-    document.getElementById('finalScore').textContent = score; // อัปเดตคะแนน
-}
+    finalScoreEl.textContent = score;
+  }
 
   function pauseGame() {
     if(gameOver) return;
     isPaused = true;
     pauseBtn.style.display = 'none';
-    resumeBtn.style.display = 'inline-block';
+    resumeBtn.style.display = 'inline-flex';
     playSound('pause');
   }
 
@@ -407,40 +617,38 @@ function clearLines() {
     if(gameOver) return;
     isPaused = false;
     lastDropTime = performance.now();
-    pauseBtn.style.display = 'inline-block';
+    pauseBtn.style.display = 'inline-flex';
     resumeBtn.style.display = 'none';
     playSound('resume');
+    requestAnimationFrame(gameLoop); // Restart animation frame
   }
 
-  // การเล่นเสียง (เปลี่ยนตามไฟล์จริงถ้ามี)
+  // Sound files (ensure these files exist in a 'sounds/' folder)
   const sounds = {
     move: new Audio('sounds/move.wav'),
     rotate: new Audio('sounds/rotate.wav'),
     down: new Audio('sounds/down.wav'),
     clear: new Audio('sounds/clear.wav'),
-    fail: new Audio(),
+    fail: new Audio('sounds/fail.wav'),
     start: new Audio('sounds/start.wav'),
-    pause: new Audio(),
-    resume: new Audio(),
+    pause: new Audio('sounds/pause.wav'),
+    resume: new Audio('sounds/resume.wav'),
     gameover: new Audio('sounds/gameover.wav'),
+    harddrop: new Audio('sounds/harddrop.wav'),
+    lock: new Audio('sounds/lock.wav'),
   };
-  // ตัวอย่าง: ใส่ src ไฟล์เสียงที่มีจริงได้ เช่น
-  // sounds.move.src = 'sounds/move.mp3';
-  // sounds.move.load();
 
   function playSound(name) {
     const sound = sounds[name];
-    if(sound && !sound.paused) {
-      // ถ้าเล่นซ้อน ๆ ให้หยุดก่อนเล่นใหม่
-      sound.pause();
-      sound.currentTime = 0;
-    }
     if(sound) {
-      sound.play().catch(() => {});
+      // Clone node to allow overlapping playback for rapid actions (e.g., fast down moves)
+      const clonedSound = sound.cloneNode();
+      clonedSound.volume = 0.7; // Reduce volume slightly if sounds are too loud
+      clonedSound.play().catch(e => console.log("Sound playback failed for", name, ":", e));
     }
   }
 
-  // Event listeners ปุ่มควบคุม
+  // Event listeners
   startBtn.addEventListener('click', startGame);
   restartBtn.addEventListener('click', () => {
     gameOverlay.style.display = 'none';
@@ -454,11 +662,48 @@ function clearLines() {
   document.getElementById('rightBtn').addEventListener('click', () => movePiece(1,0));
   document.getElementById('rotateBtn').addEventListener('click', rotatePiece);
   document.getElementById('downBtn').addEventListener('click', () => movePiece(0,1));
+  hardDropBtn.addEventListener('click', hardDrop);
 
-  // ป้องกันการ scroll บนมือถือขณะเล่น (touchmove)
+  // Prevent scrolling on mobile when interacting with controls
   window.addEventListener('touchmove', function(e){
     if(controls.contains(e.target)) e.preventDefault();
   }, { passive:false });
+
+  // Keyboard controls (for desktop testing)
+  document.addEventListener('keydown', e => {
+    if (gameOver || isPaused) {
+      // Allow 'r' to restart from game over screen
+      if (e.key === 'r' && gameOver) {
+        restartBtn.click();
+      }
+      // Allow 'p' to toggle pause/resume
+      if (e.key === 'p' && !gameOver) {
+        if (isPaused) resumeGame();
+        else pauseGame();
+      }
+      return;
+    }
+    switch (e.key) {
+      case 'ArrowLeft':
+        movePiece(-1, 0);
+        break;
+      case 'ArrowRight':
+        movePiece(1, 0);
+        break;
+      case 'ArrowUp': // Rotate
+        rotatePiece();
+        break;
+      case 'ArrowDown': // Move down
+        movePiece(0, 1);
+        break;
+      case ' ': // Space bar for Hard Drop
+        hardDrop();
+        break;
+      case 'p': // P for pause
+        pauseGame();
+        break;
+    }
+  });
 
 </script>
 </body>

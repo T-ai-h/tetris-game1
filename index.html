@@ -256,7 +256,7 @@
   const restartBtn = document.getElementById('restartBtn');
   const pauseBtn = document.getElementById('pauseBtn');
   const resumeBtn = document.getElementById('resumeBtn');
-  const topUIDiv = document.getElementById('topUI'); // เปลี่ยนชื่อตัวแปร
+  const topUIDiv = document.getElementById('topUI');
   const gameContainer = document.getElementById('gameContainer');
   const controls = document.getElementById('controls');
   const hardDropBtn = document.getElementById('hardDropBtn');
@@ -650,7 +650,7 @@
     }
   }
 
-  // Event listeners
+  // Event listeners for touch controls
   startBtn.addEventListener('click', startGame);
   restartBtn.addEventListener('click', () => {
     gameOverlay.classList.add('hidden');
@@ -673,42 +673,6 @@
       e.preventDefault();
     }
   }, { passive:false });
-
-  // Keyboard controls (for desktop testing)
-  document.addEventListener('keydown', e => {
-    if (gameOver || isPaused) {
-      // Allow 'r' to restart from game over screen
-      if (e.key === 'r' && gameOver) {
-        restartBtn.click();
-      }
-      // Allow 'p' to toggle pause/resume
-      if (e.key === 'p' && !gameOver) {
-        if (isPaused) resumeGame();
-        else pauseGame();
-      }
-      return;
-    }
-    switch (e.key) {
-      case 'ArrowLeft':
-        movePiece(-1, 0);
-        break;
-      case 'ArrowRight':
-        movePiece(1, 0);
-        break;
-      case 'ArrowUp': // Rotate
-        rotatePiece();
-        break;
-      case 'ArrowDown': // Move down
-        movePiece(0, 1);
-        break;
-      case ' ': // Space bar for Hard Drop
-        hardDrop();
-        break;
-      case 'p': // P for pause
-        pauseGame();
-        break;
-    }
-  });
 
   // Initial setup: Ensure menu screen is visible at start, others are hidden
   document.addEventListener('DOMContentLoaded', () => {

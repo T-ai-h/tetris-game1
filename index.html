@@ -27,6 +27,11 @@
     letter-spacing: 2px;
   }
 
+  /* --- Utility Class --- */
+  .hidden {
+    display: none !important;
+  }
+
   /* --- Menu & Game Over Screens --- */
   #menuScreen, #gameOverlay {
     text-align: center;
@@ -50,7 +55,7 @@
 
   /* --- Top UI (Score, Level, Next Piece) --- */
   #topUI {
-    display: none; /* ซ่อนไว้ก่อน */
+    display: flex; /* เปลี่ยนจาก none เป็น flex */
     flex-direction: row;
     align-items: flex-end; /* จัดให้ next piece ชิดด้านล่างของ flex item */
     justify-content: space-around; /* กระจายช่องไฟ */
@@ -85,8 +90,7 @@
 
   /* --- Game Canvas --- */
   #gameContainer {
-    display: none; /* ซ่อนไว้ก่อน */
-    /* margin-top: 10px; */ /* เอาออกเพราะถูกควบคุมด้วย JS */
+    display: block; /* เปลี่ยนจาก none เป็น block */
     border: 5px solid #fff; /* ขอบหนาและชัดเจน */
     box-shadow: 0 0 25px rgba(0, 255, 255, 0.6); /* เงาสีฟ้าเรืองแสงใหญ่ขึ้น */
     background-color: #0d0d0d; /* สีพื้นหลังเกม */
@@ -100,7 +104,7 @@
 
   /* --- Controls --- */
   #controls {
-    display: none; /* ซ่อนไว้ก่อน */
+    display: grid; /* เปลี่ยนจาก none เป็น grid */
     grid-template-columns: repeat(3, 1fr); /* 3 คอลัมน์ */
     grid-template-rows: repeat(3, auto); /* 3 แถว, ขนาดตามเนื้อหา */
     gap: 12px; /* ลดระยะห่างเล็กน้อย */
@@ -215,33 +219,28 @@
   <button id="startBtn">เริ่มเล่น</button>
 </div>
 
-<div id="gameOverlay" style="display:none;">
-  <div>เกมจบ!</div>
+<div id="gameOverlay" class="hidden"> <div>เกมจบ!</div>
   <div>คะแนนสุดท้าย: <span id="finalScore">0</span></div>
   <button id="restartBtn">เล่นใหม่</button>
 </div>
 
-<div id="topUI" style="display:none;">
-  <div id="scoreLevel">
+<div id="topUI" class="hidden"> <div id="scoreLevel">
     <div>คะแนน: <span id="score">0</span></div>
     <div>ระดับ: <span id="level">1</span></div>
   </div>
   <canvas id="next" width="90" height="90"></canvas>
 </div>
 
-<div id="gameContainer" style="display:none;">
-  <canvas id="game" width="300" height="600"></canvas>
+<div id="gameContainer" class="hidden"> <canvas id="game" width="300" height="600"></canvas>
 </div>
 
-<div id="controls" style="display:none;">
-  <button id="pauseBtn" title="Pause" aria-label="Pause">⏸️</button>
+<div id="controls" class="hidden"> <button id="pauseBtn" title="Pause" aria-label="Pause">⏸️</button>
   <button id="rotateBtn">⟳</button>
   <button id="hardDropBtn">⚡</button>
   <button id="leftBtn">←</button>
   <button id="downBtn">↓</button>
   <button id="rightBtn">→</button>
-  <button id="resumeBtn" title="Play" aria-label="Play" style="display:none;">▶️</button>
-</div>
+  <button id="resumeBtn" title="Play" aria-label="Play" class="hidden">▶️</button> </div>
 
 <script>
   const canvas = document.getElementById('game');
@@ -588,28 +587,31 @@
     nextPiece = randomPiece();
     drawNextPiece();
     updateScoreLevel();
-    menuScreen.style.display = 'none';
-    gameOverlay.style.display = 'none';
-    topUIDiv.style.display = 'flex'; // แก้ไขตรงนี้
-    gameContainer.style.display = 'block'; // แก้ไขตรงนี้
-    controls.style.display = 'grid';
-    pauseBtn.style.display = 'inline-flex';
-    resumeBtn.style.display = 'none';
+    
+    // Hide menu, show game elements
+    menuScreen.classList.add('hidden');
+    gameOverlay.classList.add('hidden');
+    topUIDiv.classList.remove('hidden');
+    gameContainer.classList.remove('hidden');
+    controls.classList.remove('hidden');
+    pauseBtn.classList.remove('hidden');
+    resumeBtn.classList.add('hidden');
+
     preloadSounds();
     animationFrameId = requestAnimationFrame(gameLoop);
     playSound('start');
   }
 
   function showGameOver() {
-    gameOverlay.style.display = 'flex';
+    gameOverlay.classList.remove('hidden');
     finalScoreEl.textContent = score;
   }
 
   function pauseGame() {
     if(gameOver) return;
     isPaused = true;
-    pauseBtn.style.display = 'none';
-    resumeBtn.style.display = 'inline-flex';
+    pauseBtn.classList.add('hidden');
+    resumeBtn.classList.remove('hidden');
     playSound('pause');
   }
 
@@ -617,8 +619,8 @@
     if(gameOver) return;
     isPaused = false;
     lastDropTime = performance.now();
-    pauseBtn.style.display = 'inline-flex';
-    resumeBtn.style.display = 'none';
+    pauseBtn.classList.remove('hidden');
+    resumeBtn.classList.add('hidden');
     playSound('resume');
     requestAnimationFrame(gameLoop); // Restart animation frame
   }
@@ -651,7 +653,7 @@
   // Event listeners
   startBtn.addEventListener('click', startGame);
   restartBtn.addEventListener('click', () => {
-    gameOverlay.style.display = 'none';
+    gameOverlay.classList.add('hidden');
     startGame();
   });
 
@@ -666,7 +668,10 @@
 
   // Prevent scrolling on mobile when interacting with controls
   window.addEventListener('touchmove', function(e){
-    if(controls.contains(e.target)) e.preventDefault();
+    // Only prevent default if the touch is within the game container or controls
+    if(gameContainer.contains(e.target) || controls.contains(e.target)) {
+      e.preventDefault();
+    }
   }, { passive:false });
 
   // Keyboard controls (for desktop testing)
@@ -703,6 +708,15 @@
         pauseGame();
         break;
     }
+  });
+
+  // Initial setup: Ensure menu screen is visible at start, others are hidden
+  document.addEventListener('DOMContentLoaded', () => {
+    menuScreen.classList.remove('hidden');
+    gameOverlay.classList.add('hidden');
+    topUIDiv.classList.add('hidden');
+    gameContainer.classList.add('hidden');
+    controls.classList.add('hidden');
   });
 
 </script>

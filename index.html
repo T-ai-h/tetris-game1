@@ -16,7 +16,7 @@
     align-items: center;
     justify-content: flex-start;
     min-height: 100vh;
-    padding: 15px; /* เพิ่ม padding รอบด้าน */
+    padding: 10px; /* ลด padding เล็กลง */
     box-sizing: border-box;
     overflow: hidden; /* ป้องกันการ scroll โดยไม่ตั้งใจ */
   }
@@ -25,6 +25,9 @@
     text-shadow: 3px 3px 0px rgba(0,0,0,0.5); /* เงาชัดเจนขึ้น */
     color: #fff;
     letter-spacing: 2px;
+    margin-top: 15px; /* ลด margin บน */
+    margin-bottom: 10px;
+    font-size: 6vw; /* ปรับขนาดตาม viewport */
   }
 
   /* --- Utility Class --- */
@@ -35,67 +38,68 @@
   /* --- Menu & Game Over Screens --- */
   #menuScreen, #gameOverlay {
     text-align: center;
-    margin-top: 20px;
+    margin-top: 15px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    padding: 15px;
     background-color: rgba(0, 0, 0, 0.7); /* พื้นหลังโปร่งใสเล็กน้อย */
-    border-radius: 10px;
-    box-shadow: 0 0 20px rgba(0, 255, 255, 0.5); /* เงาสีฟ้าเรืองแสง */
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.5); /* เงาสีฟ้าเรืองแสง */
   }
 
   #gameOverlay div {
-    margin-bottom: 20px;
-    font-size: 1.3em;
+    margin-bottom: 15px;
+    font-size: 1.2em;
     color: #ff4d4d; /* สีแดงสด */
     text-shadow: 1px 1px 0px #800;
   }
 
   /* --- Top UI (Score, Level, Next Piece) --- */
   #topUI {
-    display: flex; /* เปลี่ยนจาก none เป็น flex */
+    display: flex;
     flex-direction: row;
-    align-items: flex-end; /* จัดให้ next piece ชิดด้านล่างของ flex item */
-    justify-content: space-around; /* กระจายช่องไฟ */
-    gap: 20px;
-    margin: 15px 0;
+    align-items: flex-end;
+    justify-content: space-around;
+    gap: 10px;
+    margin: 10px 0;
     width: 100%;
-    max-width: 380px; /* จำกัดความกว้างรวม */
-    padding: 10px;
+    max-width: 300px; /* ลดขนาด max-width */
+    padding: 8px;
     box-sizing: border-box;
   }
 
   #scoreLevel {
-    font-size: 14px;
-    line-height: 1.6;
+    font-size: 12px;
+    line-height: 1.4;
     text-align: left;
     background-color: rgba(0, 0, 0, 0.6);
-    padding: 10px 15px;
-    border-radius: 8px;
+    padding: 8px 10px;
+    border-radius: 6px;
     border: 2px solid #555;
-    box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.2);
-    min-width: 120px; /* ให้มีพื้นที่เพียงพอ */
+    box-shadow: inset 0 0 4px rgba(255, 255, 255, 0.2);
+    min-width: 90px;
   }
 
   #next {
     background-color: #222;
-    border: 3px solid #777; /* ขอบหนาขึ้น */
-    width: 90px; /* ขนาดใหญ่ขึ้นเล็กน้อย */
-    height: 90px;
-    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3), inset 0 0 8px rgba(255, 255, 255, 0.1);
-    border-radius: 5px;
+    border: 2px solid #777;
+    width: 70px; /* ขนาดเล็กลง */
+    height: 70px;
+    box-shadow: 0 0 8px rgba(0, 255, 255, 0.3), inset 0 0 6px rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
   }
 
   /* --- Game Canvas --- */
   #gameContainer {
-    display: block; /* เปลี่ยนจาก none เป็น block */
-    border: 5px solid #fff; /* ขอบหนาและชัดเจน */
-    box-shadow: 0 0 25px rgba(0, 255, 255, 0.6); /* เงาสีฟ้าเรืองแสงใหญ่ขึ้น */
-    background-color: #0d0d0d; /* สีพื้นหลังเกม */
-    border-radius: 8px;
-    overflow: hidden; /* เพื่อให้บล็อกไม่ล้นขอบ */
+    display: block;
+    border: 3px solid #fff;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
+    background-color: #0d0d0d;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-top: 10px;
   }
 
   #game {
@@ -104,39 +108,40 @@
 
   /* --- Controls --- */
   #controls {
-    display: grid; /* เปลี่ยนจาก none เป็น grid */
-    grid-template-columns: repeat(3, 1fr); /* 3 คอลัมน์ */
-    grid-template-rows: repeat(3, auto); /* 3 แถว, ขนาดตามเนื้อหา */
-    gap: 12px; /* ลดระยะห่างเล็กน้อย */
-    margin-top: 25px;
-    padding: 15px;
-    max-width: 380px; /* จำกัดความกว้างของ grid */
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, auto);
+    gap: 1.5vw; /* เปลี่ยนเป็น vw */
+    margin-top: 15px;
+    padding: 10px;
+    max-width: 75vw; /* จำกัดความกว้างด้วย vw */
     box-sizing: border-box;
   }
 
   #controls button, #menuScreen button, #gameOverlay button {
-    width: 100%; /* ปุ่มเต็มความกว้างใน grid cell */
-    height: 60px; /* เพิ่มความสูง */
+    width: 100%;
+    height: 15vw; /* เปลี่ยนเป็น vw */
     font-family: 'Press Start 2P', cursive;
-    font-size: 20px; /* ขนาดตัวอักษรใหญ่ขึ้น */
-    background-color: #007bff; /* สีน้ำเงินสดใส */
+    font-size: 4vw; /* เปลี่ยนเป็น vw */
+    background-color: #007bff;
     color: #fff;
     border: none;
-    border-radius: 8px; /* มุมโค้งมนเล็กน้อย */
-    box-shadow: 0 5px 0px #0056b3; /* เงาด้านล่างปุ่ม */
+    border-radius: 6px;
+    box-shadow: 0 0.8vw 0px #0056b3;
     cursor: pointer;
-    transition: all 0.1s ease; /* เปลี่ยนแปลงนุ่มนวลขึ้น */
+    transition: all 0.1s ease;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 0;
-    text-shadow: 1px 1px 0px rgba(0,0,0,0.3);
+    text-shadow: 0.2vw 0.2vw 0px rgba(0,0,0,0.3);
+    box-sizing: border-box;
   }
 
   #controls button:active, #menuScreen button:active, #gameOverlay button:active {
-    background-color: #0056b3; /* สีเข้มขึ้นเมื่อกด */
-    transform: translateY(3px); /* เลื่อนลงเล็กน้อยเมื่อกด */
-    box-shadow: 0 2px 0px #003f8e; /* เงาเล็กลงเมื่อกด */
+    background-color: #0056b3;
+    transform: translateY(0.3vw);
+    box-shadow: 0 0.2vw 0px #003f8e;
   }
 
   /* Grid Area สำหรับปุ่มควบคุม */
@@ -165,48 +170,100 @@
     grid-row: 2;
   }
 
-  /* ทำให้ปุ่ม Hard Drop หรือปุ่มอื่นๆ ที่คุณต้องการอยู่แถวเดียวกับ pause/resume */
-  /* หรือถ้าต้องการปุ่ม Hard Drop แถวล่างสุดเต็มความกว้าง */
-  #hardDropBtn.full-width { /* เพิ่ม class นี้ให้ปุ่ม Hard Drop ถ้าอยากให้เต็มความกว้าง */
-    grid-column: 1 / span 3;
-    grid-row: 3;
-    max-width: none;
-  }
-
   /* Responsive Adjustments */
-  @media (max-width: 450px) {
-    body {
-      padding: 10px;
+  @media (max-width: 400px) { /* ปรับเมื่อหน้าจอกว้างน้อยกว่า 400px */
+    h1 {
+      font-size: 8vw; /* ปรับให้เล็กลงอีก */
+      margin-top: 8px;
+      margin-bottom: 5px;
     }
     #topUI {
-      gap: 15px;
-      margin: 10px 0;
+      max-width: 90%; /* ขยายออกเล็กน้อย */
+      gap: 1.5vw;
+      margin: 8px 0;
+      padding: 6px;
     }
     #scoreLevel {
-      font-size: 12px;
-      padding: 8px 12px;
+      font-size: 3.5vw; /* ปรับตาม vw */
+      padding: 6px 8px;
+      min-width: unset; /* ให้ปรับตามเนื้อหา */
     }
     #next {
-      width: 80px;
-      height: 80px;
+      width: 15vw; /* ปรับตาม vw */
+      height: 15vw; /* ปรับตาม vw */
+    }
+    #gameContainer {
+      width: 80vw; /* ปรับตาม vw */
+      height: 160vw; /* ปรับตาม vw (สูง 2 เท่าของกว้าง) */
+      border-width: 2px; /* ขอบบางลงอีก */
+      margin-top: 8px;
+    }
+    #game {
+      width: 100%;
+      height: 100%;
     }
     #controls {
-      gap: 10px;
-      padding: 10px;
+      gap: 2vw; /* เพิ่มช่องว่างเล็กน้อย */
+      padding: 8px;
+      max-width: 95vw; /* เพิ่ม max-width เพื่อให้ปุ่มใหญ่ขึ้น */
+      margin-top: 10px;
     }
     #controls button, #menuScreen button, #gameOverlay button {
-      height: 55px;
-      font-size: 18px;
+      height: 16vw; /* ปรับขนาดปุ่มให้ใหญ่ขึ้นเล็กน้อย */
+      font-size: 4.5vw; /* ปรับขนาดตัวอักษร */
+      box-shadow: 0 1vw 0px #0056b3;
+    }
+    #controls button:active, #menuScreen button:active, #gameOverlay button:active {
+      transform: translateY(0.5vw);
+      box-shadow: 0 0.3vw 0px #003f8e;
+    }
+    #menuScreen, #gameOverlay {
+      padding: 10px;
+      margin-top: 10px;
+    }
+    #gameOverlay div {
+      font-size: 1.1em;
+      margin-bottom: 10px;
+    }
+    #menuScreen button, #gameOverlay button {
+      height: 12vw;
+      font-size: 4vw;
     }
   }
 
-  @media (max-width: 320px) {
+  @media (max-width: 320px) { /* สำหรับหน้าจอที่เล็กมากๆ เช่น iPhone SE (รุ่นแรก) */
+    h1 {
+      font-size: 9vw;
+    }
     #topUI {
       flex-direction: column; /* บนจอเล็กมากให้ stack กัน */
       align-items: center;
+      max-width: 95%;
+      gap: 5px;
+    }
+    #scoreLevel {
+      margin-bottom: 5px;
+      text-align: center;
+      font-size: 4vw;
+      padding: 5px 7px;
+    }
+    #next {
+      width: 18vw;
+      height: 18vw;
+    }
+    #gameContainer {
+      width: 85vw; /* เพิ่มความกว้างขึ้นอีก */
+      height: 170vw; /* เพิ่มความสูงตามสัดส่วน */
     }
     #controls {
-      max-width: 280px;
+      gap: 2.5vw;
+      padding: 5px;
+      max-width: 98vw; /* ขยายเกือบเต็มจอ */
+      margin-top: 8px;
+    }
+    #controls button, #menuScreen button, #gameOverlay button {
+      height: 18vw; /* ปรับขนาดปุ่มให้ใหญ่ขึ้นอีก */
+      font-size: 5vw; /* ปรับขนาดตัวอักษร */
     }
   }
 
@@ -219,28 +276,33 @@
   <button id="startBtn">เริ่มเล่น</button>
 </div>
 
-<div id="gameOverlay" class="hidden"> <div>เกมจบ!</div>
+<div id="gameOverlay" class="hidden">
+  <div>เกมจบ!</div>
   <div>คะแนนสุดท้าย: <span id="finalScore">0</span></div>
   <button id="restartBtn">เล่นใหม่</button>
 </div>
 
-<div id="topUI" class="hidden"> <div id="scoreLevel">
+<div id="topUI" class="hidden">
+  <div id="scoreLevel">
     <div>คะแนน: <span id="score">0</span></div>
     <div>ระดับ: <span id="level">1</span></div>
   </div>
   <canvas id="next" width="90" height="90"></canvas>
 </div>
 
-<div id="gameContainer" class="hidden"> <canvas id="game" width="300" height="600"></canvas>
+<div id="gameContainer" class="hidden">
+  <canvas id="game" width="300" height="600"></canvas>
 </div>
 
-<div id="controls" class="hidden"> <button id="pauseBtn" title="Pause" aria-label="Pause">⏸️</button>
+<div id="controls" class="hidden">
+  <button id="pauseBtn" title="Pause" aria-label="Pause">⏸️</button>
   <button id="rotateBtn">⟳</button>
   <button id="hardDropBtn">⚡</button>
   <button id="leftBtn">←</button>
   <button id="downBtn">↓</button>
   <button id="rightBtn">→</button>
-  <button id="resumeBtn" title="Play" aria-label="Play" class="hidden">▶️</button> </div>
+  <button id="resumeBtn" title="Play" aria-label="Play" class="hidden">▶️</button>
+</div>
 
 <script>
   const canvas = document.getElementById('game');
@@ -261,9 +323,22 @@
   const controls = document.getElementById('controls');
   const hardDropBtn = document.getElementById('hardDropBtn');
 
-  const ROWS = 20;
+  // Adjust canvas dimensions based on BLOCK_SIZE for responsiveness
+  let BLOCK_SIZE;
   const COLS = 10;
-  const BLOCK_SIZE = canvas.width / COLS;
+  const ROWS = 20;
+
+  function setCanvasDimensions() {
+    const maxGameWidth = Math.min(300, window.innerWidth * 0.75); // Max 300px, but responsive
+    BLOCK_SIZE = Math.floor(maxGameWidth / COLS);
+    canvas.width = BLOCK_SIZE * COLS;
+    canvas.height = BLOCK_SIZE * ROWS;
+  }
+
+  // Initial set and on resize
+  setCanvasDimensions();
+  window.addEventListener('resize', setCanvasDimensions);
+
 
   // ชนิดบล็อกและสี
   const SHAPES = [
@@ -575,6 +650,7 @@
   }
 
   function startGame() {
+    setCanvasDimensions(); // Set canvas dimensions before starting game
     resetBoard();
     score = 0;
     level = 1;
@@ -681,6 +757,7 @@
     topUIDiv.classList.add('hidden');
     gameContainer.classList.add('hidden');
     controls.classList.add('hidden');
+    setCanvasDimensions(); // Set initial canvas size on load
   });
 
 </script>

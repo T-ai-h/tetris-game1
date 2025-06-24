@@ -6,193 +6,72 @@
 <title>Tetris Mobile Game</title>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
 <style>
-  * {
-    box-sizing: border-box;
-  }
   body {
-    margin: 0; padding: 0;
-    background: linear-gradient(135deg, #3f51b5, #9c27b0);
-    color: #eee;
-    font-family: 'Press Start 2P', cursive, monospace;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    height: 100vh;
-    user-select: none;
-  }
-  #menuScreen, #gameOverlay {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0, 0, 0, 0.85);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    z-index: 999;
-    text-shadow: 0 0 10px #fff;
-  }
-  #menuScreen h1 {
-    font-size: 2.8em;
-    color: #ff4081;
-    margin-bottom: 40px;
-    text-shadow:
-      0 0 10px #ff4081,
-      0 0 20px #e040fb,
-      0 0 30px #7c4dff;
-  }
-  button {
-    font-family: 'Press Start 2P', cursive, monospace;
-    cursor: pointer;
-    border: none;
-    border-radius: 15px;
-    padding: 20px 40px;
-    font-size: 1em;
+    margin: 0;
+    font-family: 'Press Start 2P', cursive;
+    background: #000;
     color: #fff;
-    background: linear-gradient(45deg, #ff4081, #7c4dff);
-    box-shadow:
-      0 0 15px #ff4081,
-      0 0 30px #7c4dff;
-    transition: all 0.3s ease;
-    user-select: none;
-  }
-  button:hover {
-    background: linear-gradient(45deg, #e040fb, #651fff);
-    box-shadow:
-      0 0 20px #e040fb,
-      0 0 40px #651fff;
-    transform: scale(1.05);
-  }
-  button:active {
-    transform: scale(0.95);
-    box-shadow: none;
-  }
-  #scoreLevel {
-    margin: 12px 0;
-    font-size: 1.2em;
-    text-align: center;
-    text-shadow: 0 0 8px #fff;
-  }
-  #gameContainer {
     display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    gap: 12px;
-    width: 100%;
-    max-width: 460px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100vh;
     padding: 10px;
-    background: rgba(0,0,0,0.3);
-    border-radius: 15px;
-    box-shadow:
-      0 0 15px #7c4dff,
-      inset 0 0 20px #e040fb;
   }
-  canvas {
-    image-rendering: pixelated;
-    background: #111;
-    border-radius: 12px;
-    border: 4px solid transparent;
-    box-shadow:
-      0 0 15px #7c4dff,
-      inset 0 0 40px #e040fb;
-  }
-  #game {
-    width: 300px;
-    height: 600px;
-  }
-  #next {
-    width: 140px;
-    height: 140px;
+
+  #menuScreen, #gameOverlay {
+    text-align: center;
     margin-top: 40px;
   }
+
+  #topUI {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin: 10px 0;
+  }
+
+  #scoreLevel {
+    font-size: 12px;
+    line-height: 1.5;
+    text-align: center;
+  }
+
+  #next {
+    background-color: #111;
+    border: 2px solid #fff;
+    width: 80px;
+    height: 80px;
+  }
+
+  #gameContainer {
+    margin-top: 10px;
+  }
+  /* ตัวอย่างการปรับ CSS */
+#gameAreaWrapper { /* สมมติว่ามี div ครอบ gameContainer และ topUI */
+  display: flex;
+  flex-direction: row; /* หรือ column-reverse ถ้าต้องการให้ score/next อยู่ด้านล่าง */
+  align-items: flex-start; /* หรือ center */
+  gap: 20px;
+}
+
   #controls {
     display: flex;
-    justify-content: center;
-    gap: 15px;
-    padding: 12px 10px;
     flex-wrap: wrap;
-    width: 100%;
-    max-width: 460px;
+    justify-content: center;
+    gap: 10px;
     margin-top: 15px;
+    padding: 10px;
   }
+
   #controls button {
-    flex: 1 1 60px;
-    padding: 18px 0;
-    font-size: 1.4em;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #651fff, #d500f9);
-    box-shadow:
-      0 0 15px #d500f9,
-      inset 0 0 10px #651fff;
-    transition: all 0.3s ease;
-    max-width: 80px;
-    color: #fff;
-    user-select: none;
-  }
-  #controls button:active {
-    background: linear-gradient(135deg, #d500f9, #651fff);
-    box-shadow: none;
-    transform: scale(0.9);
-  }
-  #pauseBtn, #resumeBtn {
-    width: 40px;
-    height: 40px;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    position: relative;
-    margin: 0 5px;
-  }
-
-  /* ปุ่มหยุด: สองขีดแนวตั้ง */
-  #pauseBtn::before, #pauseBtn::after {
-    content: '';
-    position: absolute;
-    top: 8px;
-    width: 8px;
-    height: 24px;
-    background-color: #ddd;
-    border-radius: 2px;
-  }
-  #pauseBtn::before {
-    left: 10px;
-  }
-  #pauseBtn::after {
-    right: 10px;
-  }
-
-  /* ปุ่มเล่น: รูปสามเหลี่ยมแนวขวา */
-  #resumeBtn::before {
-    content: '';
-    position: absolute;
-    top: 6px;
-    left: 12px;
-    width: 0;
-    height: 0;
-    border-top: 14px solid transparent;
-    border-bottom: 14px solid transparent;
-    border-left: 20px solid #ddd;
-  }
-
-  #pauseBtn:hover, #resumeBtn:hover {
-    background: linear-gradient(135deg, #f50057, #c51162);
-    box-shadow:
-      0 0 25px #c51162,
-      inset 0 0 20px #f50057;
-  }
-  #gameOverlay div {
-    color: #ff1744;
-    font-size: 3em;
-    text-shadow:
-      0 0 10px #ff1744,
-      0 0 20px #f50057;
-    margin-bottom: 30px;
-  }
-  @media (max-width: 400px) {
-    #game { width: 240px; height: 480px; }
-    #next { width: 110px; height: 110px; margin-top: 30px; }
-    #controls button { font-size: 1.2em; max-width: 65px; padding: 15px 0; }
-    #pauseBtn, #resumeBtn { max-width: 100px; font-size: 1em; margin-left: 5px;}
+    width: 22vw;
+    max-width: 70px;
+    height: 50px;
+    font-size: 18px;
+    border-radius: 10px;
   }
 </style>
 </head>
@@ -204,17 +83,20 @@
 </div>
 
 <div id="gameOverlay" style="display:none;">
-  <div>เกมจบ!</div>
-  <button id="restartBtn">เล่นใหม่</button>
+    <div>เกมจบ!</div>
+    <div>คะแนนสุดท้าย: <span id="finalScore">0</span></div> <button id="restartBtn">เล่นใหม่</button>
 </div>
 
-<div id="scoreLevel" style="display:none;">
-  คะแนน: <span id="score">0</span> | ระดับ: <span id="level">1</span>
+<div id="topUI" style="display:none;">
+  <div id="scoreLevel">
+    <div>คะแนน: <span id="score">0</span></div>
+    <div>ระดับ: <span id="level">1</span></div>
+  </div>
+  <canvas id="next" width="80" height="80"></canvas>
 </div>
 
 <div id="gameContainer" style="display:none;">
   <canvas id="game" width="300" height="600"></canvas>
-  <canvas id="next" width="140" height="140"></canvas>
 </div>
 
 <div id="controls" style="display:none;">
@@ -222,12 +104,12 @@
   <button id="rightBtn">→</button>
   <button id="rotateBtn">⟳</button>
   <button id="downBtn">↓</button>
-  <button id="pauseBtn" title="Pause" aria-label="Pause"></button>
-  <button id="resumeBtn" title="Play" aria-label="Play" style="display:none;"></button>
+ <button id="pauseBtn" title="Pause" aria-label="Pause">⏸️</button>
+<button id="resumeBtn" title="Play" aria-label="Play" style="display:none;">▶️</button>
 </div>
 
 <script>
-  const canvas = document.getElementById('game');
+   const canvas = document.getElementById('game');
   const ctx = canvas.getContext('2d');
   const nextCanvas = document.getElementById('next');
   const nextCtx = nextCanvas.getContext('2d');
@@ -424,26 +306,38 @@
     }
   }
 
-  function clearLines() {
-    let lines = 0;
-    for(let y=ROWS-1; y>=0; y--) {
-      if(board[y].every(cell => cell !== 0)) {
-        lines++;
-        board.splice(y,1);
-        board.unshift(new Array(COLS).fill(0));
-        y++; // ตรวจซ้ำบรรทัดใหม่ที่เลื่อนลงมา
-      }
+function clearLines() {
+  let lines = 0;
+  outer: for (let y = ROWS - 1; y >= 0; y--) {
+    for (let x = 0; x < COLS; x++) {
+      if (!board[y][x]) continue outer;
     }
-    if(lines > 0) {
-      linesCleared += lines;
-      score += lines * lines * 50;
-      level = Math.min(10, Math.floor(linesCleared / 3) + 1);
-      dropInterval = 300 - (level - 1) * 70;
-      playSound('clear');
-      draw();
-      updateScoreLevel();
-    }
+    // ถ้าแถวเต็ม
+    board.splice(y, 1); // ลบแถวนั้น
+    board.unshift(new Array(COLS).fill(0)); // เพิ่มแถวว่างด้านบน
+    lines++;
+    y++; // ตรวจแถวเดิมอีกครั้ง (เพราะเลื่อนแถวลงมาแล้ว)
   }
+
+  if (lines > 0) {
+  linesCleared += lines;
+  score += lines * 100 * level;
+
+  // เพิ่ม level เฉพาะเมื่อเคลียร์ครบ 10 แถว
+  const newLevel = Math.floor(linesCleared / 10) + 1;
+  if (newLevel !== level) {
+    level = newLevel;
+    dropInterval = Math.max(100, 1500 - (level - 1) * 80);
+  }
+
+  scoreEl.textContent = score;
+  levelEl.textContent = level;
+  playSound('clear');
+}
+
+}
+
+  
 
   function spawnNextPiece() {
     currentPiece = nextPiece;
@@ -506,7 +400,8 @@
 
   function showGameOver() {
     gameOverlay.style.display = 'flex';
-  }
+    document.getElementById('finalScore').textContent = score; // อัปเดตคะแนน
+}
 
   function pauseGame() {
     if(gameOver) return;
@@ -574,6 +469,5 @@
   }, { passive:false });
 
 </script>
-
 </body>
 </html>

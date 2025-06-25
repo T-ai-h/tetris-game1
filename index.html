@@ -26,30 +26,30 @@
       background: #111;
       border: 2px solid #444;
       display: block;
-      width: 100vw;
-      max-width: 100vw;
+      width: 90vw;
+      max-width: 90vw;
       height: auto;
     }
 
     .controls, .menu {
       position: fixed;
-      bottom: 10px;
+      bottom: 0;
       width: 100%;
       display: flex;
       justify-content: space-around;
       padding: 10px;
-      background: rgba(0, 0, 0, 0.7);
+      background: rgba(0, 0, 0, 0.8);
     }
 
     .controls button, .menu button {
       flex: 1;
       margin: 0 5px;
-      padding: 15px;
-      font-size: 18px;
+      padding: 20px;
+      font-size: 24px;
       background: #333;
       color: white;
       border: none;
-      border-radius: 10px;
+      border-radius: 12px;
       transition: background 0.3s;
     }
 
@@ -57,14 +57,21 @@
       background: #555;
     }
 
-    .score {
+    .score, #nextPiece {
       position: fixed;
       top: 10px;
-      right: 10px;
-      font-size: 20px;
       background: rgba(0,0,0,0.5);
       padding: 10px 15px;
       border-radius: 8px;
+      font-size: 18px;
+    }
+
+    .score {
+      right: 10px;
+    }
+
+    #nextPiece {
+      left: 10px;
     }
 
     #startScreen, #gameOverScreen {
@@ -104,12 +111,13 @@
   </div>
 
   <div class="score">Score: <span id="score">0</span></div>
+  <div id="nextPiece">Next:</div>
   <canvas id="tetris" width="240" height="400"></canvas>
   <div class="controls">
     <button onclick="move(-1)">&#8592;</button>
-    <button onclick="rotate()">&#8635;</button>
+    <button onclick="rotate()">↻</button>
     <button onclick="move(1)">&#8594;</button>
-    <button onclick="drop()">&#8595;</button>
+    <button onclick="drop()">↓</button>
     <button onclick="togglePause()">⏸</button>
   </div>
 
@@ -119,7 +127,7 @@
     context.scale(20, 20);
 
     const scoreElement = document.getElementById('score');
-
+    const nextPieceElement = document.getElementById('nextPiece');
     const startScreen = document.getElementById('startScreen');
     const gameOverScreen = document.getElementById('gameOverScreen');
 
@@ -133,7 +141,8 @@
     const player = {
       pos: {x: 0, y: 0},
       matrix: null,
-      score: 0
+      score: 0,
+      next: null
     };
 
     function createMatrix(w, h) {
@@ -192,15 +201,23 @@
 
     function playerReset() {
       const pieces = 'TJLOSZI';
-      player.matrix = createPiece(pieces[Math.floor(Math.random() * pieces.length)]);
+      player.matrix = player.next || createPiece(pieces[Math.floor(Math.random() * pieces.length)]);
+      player.next = createPiece(pieces[Math.floor(Math.random() * pieces.length)]);
       player.pos.y = 0;
       player.pos.x = Math.floor(arena[0].length / 2) - Math.floor(player.matrix[0].length / 2);
+      updateNextPiece();
       if (collide(arena, player)) {
         gameOverScreen.style.display = 'flex';
         cancelAnimationFrame(animationId);
         gameStarted = false;
-        return;
       }
+    }
+
+    function updateNextPiece() {
+      nextPieceElement.innerText = 'Next:';
+      player.next.forEach(row => {
+        nextPieceElement.innerText += '\n' + row.map(v => v ? '█' : ' ').join(' ');
+      });
     }
 
     function playerDrop() {
@@ -290,6 +307,7 @@
       startScreen.style.display = 'none';
       gameOverScreen.style.display = 'none';
       gameStarted = true;
+      player.next = null;
       playerReset();
       update();
     }

@@ -126,7 +126,16 @@
     <button onclick="togglePause()">⏸</button>
   </div>
 
+   <audio id="moveSound" src="sounds/move.wav"></audio>
+  <audio id="dropSound" src="sounds/land.wav"></audio>
+  <audio id="clearSound" src="sounds/clear.wav"></audio>
+  <audio id="gameOverSound" src="sounds/gameover.wav"></audio>
   <script>
+    const moveSound = document.getElementById('moveSound');
+    const dropSound = document.getElementById('dropSound');
+    const clearSound = document.getElementById('clearSound');
+    const gameOverSound = document.getElementById('gameOverSound');
+
     const canvas = document.getElementById('tetris');
     const context = canvas.getContext('2d');
     context.scale(20, 20);
@@ -214,6 +223,7 @@
       if (collide(arena, player)) {
         gameOverScreen.style.display = 'flex';
         cancelAnimationFrame(animationId);
+        gameOverSound.play();
         gameStarted = false;
       }
     }
@@ -233,6 +243,7 @@
         playerReset();
         arenaSweep();
       }
+      dropSound.play();
       dropCounter = 0;
     }
 
@@ -240,29 +251,40 @@
       player.pos.x += dir;
       if (collide(arena, player)) {
         player.pos.x -= dir;
+      } else {
+        moveSound.play();
       }
     }
 
     function playerRotate() {
       const m = player.matrix;
+      const pos = player.pos.x;
+      let offset = 1;
+
+      // Rotate
       for (let y = 0; y < m.length; ++y) {
         for (let x = 0; x < y; ++x) {
           [m[x][y], m[y][x]] = [m[y][x], m[x][y]];
         }
       }
       m.forEach(row => row.reverse());
-      if (collide(arena, player)) {
-        for (let i = 0; i < 3; ++i) {
-          player.pos.x += i % 2 === 0 ? -1 : 1;
-          if (!collide(arena, player)) return;
-        }
-        for (let y = 0; y < m.length; ++y) {
-          for (let x = 0; x < y; ++x) {
-            [m[x][y], m[y][x]] = [m[y][x], m[x][y]];
+
+      while (collide(arena, player)) {
+        player.pos.x += offset;
+        offset = -(offset + (offset > 0 ? 1 : -1));
+        if (offset > m[0].length) {
+          // Undo rotation
+          for (let y = 0; y < m.length; ++y) {
+            for (let x = 0; x < y; ++x) {
+              [m[x][y], m[y][x]] = [m[y][x], m[x][y]];
+            }
           }
+          m.reverse();
+          player.pos.x = pos;
+          return;
         }
-        m.reverse();
       }
+      moveSound.play();
     }
 
     function arenaSweep() {
@@ -277,6 +299,7 @@
         y++;
         player.score += 10;
         updateScore();
+        clearSound.play();
       }
     }
 

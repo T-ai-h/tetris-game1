@@ -10,146 +10,136 @@
     }
 
     html, body {
-  margin: 0;
-  padding: 0;
-  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-  color: #eee;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  touch-action: none;
-  overflow: hidden;
-}
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: #fff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      touch-action: none;
+      overflow: hidden;
+    }
 
-canvas {
-  background: linear-gradient(45deg, #1e1e1e, #2a2a2a);
-  border: 4px solid #00d8ff;
-  border-radius: 15px;
-  box-shadow: 0 0 15px #00d8ffaa;
-  display: block;
-  width: 90vw;
-  max-width: 360px;
-  height: 60vh;
-  max-height: 480px;
-}
+    canvas {
+      background: #111;
+      border: 3px solid #00d8ff;
+      border-radius: 12px;
+      box-shadow: 0 0 12px #00d8ffaa;
+      width: 95vw;
+      max-width: 420px;
+      height: 65vh;
+      max-height: 90vh;
+    }
 
-.controls, .menu {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  max-width: 400px;
-  display: flex;
-  justify-content: space-around;
-  padding: 15px 10px;
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(6px);
-  box-shadow: 0 -3px 10px #00d8ffaa;
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
-}
+    .controls, .menu {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+      padding: 15px;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(5px);
+      box-shadow: 0 -3px 8px #00d8ff88;
+    }
 
-.controls button, .menu button {
-  flex: 1;
-  margin: 0 7px;
-  padding: 20px 0;
-  font-size: 28px;
-  background: linear-gradient(145deg, #00d8ff, #008fb3);
-  color: white;
-  border: none;
-  border-radius: 18px;
-  box-shadow: 0 5px 10px #008fb3aa;
-  transition: background 0.3s, box-shadow 0.3s;
-  user-select: none;
-}
+    .controls button, .menu button {
+      flex: 1;
+      margin: 0 7px;
+      padding: 22px 0;
+      font-size: 36px;
+      background: linear-gradient(145deg, #00d8ff, #008fb3);
+      color: white;
+      border: none;
+      border-radius: 16px;
+      box-shadow: 0 5px 10px #008fb3aa;
+      transition: background 0.3s, box-shadow 0.3s;
+      user-select: none;
+    }
 
-.controls button:hover, .menu button:hover {
-  background: linear-gradient(145deg, #008fb3, #00d8ff);
-  box-shadow: 0 8px 20px #00d8ffcc;
-  cursor: pointer;
-}
+    .controls button:hover, .menu button:hover {
+      background: linear-gradient(145deg, #008fb3, #00d8ff);
+      box-shadow: 0 8px 20px #00d8ffcc;
+      cursor: pointer;
+    }
 
-.score, #nextPiece {
-  position: fixed;
-  top: 15px;
-  background: rgba(0, 216, 255, 0.1);
-  border: 2px solid #00d8ff;
-  padding: 15px 20px;
-  border-radius: 15px;
-  font-size: 22px;
-  font-family: 'Courier New', Courier, monospace;
-  box-shadow: 0 0 12px #00d8ff88;
-  color: #00eaff;
-  user-select: none;
-}
+    .score, #nextPiece {
+      position: fixed;
+      top: 10px;
+      background: rgba(0, 216, 255, 0.1);
+      border: 2px solid #00d8ff;
+      padding: 10px 15px;
+      border-radius: 12px;
+      font-size: 20px;
+      font-family: monospace;
+      box-shadow: 0 0 10px #00d8ff66;
+      color: #00eaff;
+      user-select: none;
+    }
 
-.score {
-  right: 15px;
-  min-width: 110px;
-  text-align: center;
-}
+    .score {
+      right: 10px;
+      min-width: 100px;
+      text-align: center;
+    }
 
-#nextPiece {
-  left: 15px;
-  white-space: pre;
-  min-width: 90px;
-  text-align: center;
-}
+    #nextPiece {
+      left: 10px;
+      white-space: pre;
+      min-width: 90px;
+      text-align: center;
+    }
 
-#startScreen, #gameOverScreen {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #000000dd, #00384ddd);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  z-index: 10;
-  animation: fadeIn 0.6s ease forwards;
-  color: #00eaff;
-  text-shadow: 0 0 8px #00d8ffaa;
-}
+    #startScreen, #gameOverScreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #000000dd, #00384ddd);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      z-index: 10;
+      animation: fadeIn 0.6s ease forwards;
+      color: #00eaff;
+      text-shadow: 0 0 8px #00d8ffaa;
+    }
 
-#startScreen h1, #gameOverScreen h1 {
-  font-size: 56px;
-  margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 8px;
-}
+    #startScreen button, #gameOverScreen button {
+      margin-top: 30px;
+      padding: 18px 40px;
+      font-size: 26px;
+      background: #00d8ff;
+      border: none;
+      border-radius: 25px;
+      box-shadow: 0 5px 15px #00d8ffcc;
+      color: #002233;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s, box-shadow 0.3s;
+      user-select: none;
+    }
 
-#startScreen button, #gameOverScreen button {
-  margin-top: 30px;
-  padding: 18px 40px;
-  font-size: 26px;
-  background: #00d8ff;
-  border: none;
-  border-radius: 25px;
-  box-shadow: 0 5px 15px #00d8ffcc;
-  color: #002233;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background 0.3s, box-shadow 0.3s;
-  user-select: none;
-}
+    #startScreen button:hover, #gameOverScreen button:hover {
+      background: #008fb3;
+      box-shadow: 0 7px 20px #008fb3cc;
+    }
 
-#startScreen button:hover, #gameOverScreen button:hover {
-  background: #008fb3;
-  box-shadow: 0 7px 20px #008fb3cc;
-}
-
-@keyframes fadeIn {
-  from {opacity: 0;}
-  to {opacity: 1;}
-}
-
+    @keyframes fadeIn {
+      from {opacity: 0;}
+      to {opacity: 1;}
+    }
   </style>
 </head>
 <body>
+<!-- เนื้อหาเดิมทั้งหมดเหมือนเดิม ยกเว้นส่วน CSS ที่ปรับปรุงแล้ว -->
+
   <div id="startScreen">
     <h1>TETRIS</h1>
     <button onclick="startGame()">Start Game</button>

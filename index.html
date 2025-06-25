@@ -1,391 +1,465 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tetris Mobile Full</title>
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+<title>Tetris Mobile Game</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+<style>
+  body {
+    margin: 0;
+    font-family: 'Press Start 2P', cursive;
+    background: #000;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100vh;
+    padding: 10px;
+  }
 
-    html, body {
-      margin: 0;
-      padding: 0;
-      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-      color: #fff;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      touch-action: none;
-      overflow: hidden;
-    }
+  #menuScreen, #gameOverlay {
+    text-align: center;
+    margin-top: 40px;
+  }
 
-    canvas {
-      background: #111;
-      border: 3px solid #00d8ff;
-      border-radius: 12px;
-      box-shadow: 0 0 12px #00d8ffaa;
-      width: 95vw;
-      max-width: 420px;
-      height: 65vh;
-      max-height: 90vh;
-    }
+  #topUI {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin: 10px 0;
+  }
 
-    .controls, .menu {
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      display: flex;
-      justify-content: space-around;
-      padding: 15px;
-      background: rgba(0, 0, 0, 0.85);
-      backdrop-filter: blur(5px);
-      box-shadow: 0 -3px 8px #00d8ff88;
-    }
+  #scoreLevel {
+    font-size: 12px;
+    line-height: 1.5;
+    text-align: center;
+  }
 
-    .controls button, .menu button {
-      flex: 1;
-      margin: 0 7px;
-      padding: 22px 0;
-      font-size: 36px;
-      background: linear-gradient(145deg, #00d8ff, #008fb3);
-      color: white;
-      border: none;
-      border-radius: 16px;
-      box-shadow: 0 5px 10px #008fb3aa;
-      transition: background 0.3s, box-shadow 0.3s;
-      user-select: none;
-    }
+  #next {
+    background-color: #111;
+    border: 2px solid #fff;
+    width: 80px;
+    height: 80px;
+  }
 
-    .controls button:hover, .menu button:hover {
-      background: linear-gradient(145deg, #008fb3, #00d8ff);
-      box-shadow: 0 8px 20px #00d8ffcc;
-      cursor: pointer;
-    }
+  #gameContainer {
+    margin-top: 10px;
+  }
 
-    .score, #nextPiece {
-      position: fixed;
-      top: 10px;
-      background: rgba(0, 216, 255, 0.1);
-      border: 2px solid #00d8ff;
-      padding: 10px 15px;
-      border-radius: 12px;
-      font-size: 20px;
-      font-family: monospace;
-      box-shadow: 0 0 10px #00d8ff66;
-      color: #00eaff;
-      user-select: none;
-    }
+  #controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px;
+    padding: 10px;
+  }
 
-    .score {
-      right: 10px;
-      min-width: 100px;
-      text-align: center;
-    }
-
-    #nextPiece {
-      left: 10px;
-      white-space: pre;
-      min-width: 90px;
-      text-align: center;
-    }
-
-    #startScreen, #gameOverScreen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, #000000dd, #00384ddd);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      z-index: 10;
-      animation: fadeIn 0.6s ease forwards;
-      color: #00eaff;
-      text-shadow: 0 0 8px #00d8ffaa;
-    }
-
-    #startScreen button, #gameOverScreen button {
-      margin-top: 30px;
-      padding: 18px 40px;
-      font-size: 26px;
-      background: #00d8ff;
-      border: none;
-      border-radius: 25px;
-      box-shadow: 0 5px 15px #00d8ffcc;
-      color: #002233;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.3s, box-shadow 0.3s;
-      user-select: none;
-    }
-
-    #startScreen button:hover, #gameOverScreen button:hover {
-      background: #008fb3;
-      box-shadow: 0 7px 20px #008fb3cc;
-    }
-
-    @keyframes fadeIn {
-      from {opacity: 0;}
-      to {opacity: 1;}
-    }
-  </style>
+  #controls button {
+    width: 22vw;
+    max-width: 70px;
+    height: 50px;
+    font-size: 18px;
+    border-radius: 10px;
+  }
+</style>
 </head>
 <body>
-<!-- เนื้อหาเดิมทั้งหมดเหมือนเดิม ยกเว้นส่วน CSS ที่ปรับปรุงแล้ว -->
 
-  <div id="startScreen">
-    <h1>TETRIS</h1>
-    <button onclick="startGame()">Start Game</button>
+<div id="menuScreen">
+  <h1>TETRIS MOBILE</h1>
+  <button id="startBtn">เริ่มเล่น</button>
+</div>
+
+<div id="gameOverlay" style="display:none;">
+  <div>เกมจบ!</div>
+  <button id="restartBtn">เล่นใหม่</button>
+</div>
+
+<div id="topUI" style="display:none;">
+  <div id="scoreLevel">
+    <div>คะแนน: <span id="score">0</span></div>
+    <div>ระดับ: <span id="level">1</span></div>
   </div>
+  <canvas id="next" width="80" height="80"></canvas>
+</div>
 
-  <div id="gameOverScreen" style="display:none">
-    <h1>Game Over</h1>
-    <button onclick="startGame()">Restart</button>
-  </div>
+<div id="gameContainer" style="display:none;">
+  <canvas id="game" width="300" height="600"></canvas>
+</div>
 
-  <div class="score">Score: <span id="score">0</span></div>
-  <div id="nextPiece">Next:</div>
-  <canvas id="tetris" width="240" height="400"></canvas>
-  <div class="controls">
-    <button onclick="move(-1)">&#8592;</button>
-    <button onclick="rotate()">↻</button>
-    <button onclick="move(1)">&#8594;</button>
-    <button onclick="drop()">↓</button>
-    <button onclick="togglePause()">⏸</button>
-  </div>
+<div id="controls" style="display:none;">
+  <button id="leftBtn">←</button>
+  <button id="rightBtn">→</button>
+  <button id="rotateBtn">⟳</button>
+  <button id="downBtn">↓</button>
+  <button id="pauseBtn" title="Pause" aria-label="Pause"></button>
+  <button id="resumeBtn" title="Play" aria-label="Play" style="display:none;"></button>
+</div>
 
-   <audio id="moveSound" src="sounds/move.wav"></audio>
-  <audio id="dropSound" src="sounds/land.wav"></audio>
-  <audio id="clearSound" src="sounds/clear.wav"></audio>
-  <audio id="gameOverSound" src="sounds/gameover.wav"></audio>
-  <script>
-    const moveSound = document.getElementById('moveSound');
-    const dropSound = document.getElementById('dropSound');
-    const clearSound = document.getElementById('clearSound');
-    const gameOverSound = document.getElementById('gameOverSound');
+<script>
+   const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const nextCanvas = document.getElementById('next');
+  const nextCtx = nextCanvas.getContext('2d');
+  const scoreEl = document.getElementById('score');
+  const levelEl = document.getElementById('level');
+  const menuScreen = document.getElementById('menuScreen');
+  const gameOverlay = document.getElementById('gameOverlay');
+  const startBtn = document.getElementById('startBtn');
+  const restartBtn = document.getElementById('restartBtn');
+  const pauseBtn = document.getElementById('pauseBtn');
+  const resumeBtn = document.getElementById('resumeBtn');
+  const scoreLevelDiv = document.getElementById('scoreLevel');
+  const gameContainer = document.getElementById('gameContainer');
+  const controls = document.getElementById('controls');
 
-    const canvas = document.getElementById('tetris');
-    const context = canvas.getContext('2d');
-    context.scale(20, 20);
+  const ROWS = 20;
+  const COLS = 10;
+  const BLOCK_SIZE = canvas.width / COLS;
 
-    const scoreElement = document.getElementById('score');
-    const nextPieceElement = document.getElementById('nextPiece');
-    const startScreen = document.getElementById('startScreen');
-    const gameOverScreen = document.getElementById('gameOverScreen');
+  // ชนิดบล็อกและสี
+  const SHAPES = [
+    [],
+    [[1,1,1,1]], // I
+    [[1,1,0],[0,1,1]], // Z
+    [[0,1,1],[1,1,0]], // S
+    [[1,1,1],[0,1,0]], // T
+    [[1,1],[1,1]], // O
+    [[1,0,0],[1,1,1]], // L
+    [[0,0,1],[1,1,1]], // J
+  ];
+  const COLORS = [
+    null,
+    '#00ffff', // I
+    '#ff0000', // Z
+    '#00ff00', // S
+    '#aa00ff', // T
+    '#ffff00', // O
+    '#ff8800', // L
+    '#0000ff', // J
+  ];
 
-    const colors = [null,'red','yellow','purple','green','blue','cyan','orange'];
+  let board = [];
+  let currentPiece = null;
+  let currentX = 0;
+  let currentY = 0;
+  let nextPiece = null;
+  let score = 0;
+  let level = 1;
+  let linesCleared = 0;
+  let gameOver = false;
+  let dropInterval = 1000;
+  let lastDropTime = 0;
+  let isPaused = false;
+  let animationFrameId = null;
 
-    const arena = createMatrix(12, 20);
-    let animationId;
-    let paused = false;
-    let gameStarted = false;
+  function resetBoard() {
+    board = [];
+    for(let r=0; r<ROWS; r++) {
+      board.push(new Array(COLS).fill(0));
+    }
+  }
 
-    const player = {
-      pos: {x: 0, y: 0},
-      matrix: null,
-      score: 0,
-      next: null
+  function randomPiece() {
+    const id = Math.floor(Math.random() * (SHAPES.length - 1)) + 1;
+    return {
+      id: id,
+      shape: SHAPES[id],
+      color: COLORS[id],
+      x: Math.floor(COLS/2) - Math.ceil(SHAPES[id][0].length/2),
+      y: 0
     };
+  }
 
-    function createMatrix(w, h) {
-      return Array.from({length: h}, () => Array(w).fill(0));
-    }
+  function drawBlock(x, y, color, context=ctx) {
+    context.fillStyle = color;
+    context.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE-1, BLOCK_SIZE-1);
+    context.strokeStyle = 'rgba(255,255,255,0.1)';
+    context.strokeRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE-1, BLOCK_SIZE-1);
+  }
 
-    function createPiece(type) {
-      if (type === 'T') return [[0,1,0],[1,1,1],[0,0,0]];
-      if (type === 'O') return [[2,2],[2,2]];
-      if (type === 'L') return [[0,0,3],[3,3,3],[0,0,0]];
-      if (type === 'J') return [[4,0,0],[4,4,4],[0,0,0]];
-      if (type === 'I') return [[0,0,0,0],[5,5,5,5],[0,0,0,0],[0,0,0,0]];
-      if (type === 'S') return [[0,6,6],[6,6,0],[0,0,0]];
-      if (type === 'Z') return [[7,7,0],[0,7,7],[0,0,0]];
-    }
-
-    function drawMatrix(matrix, offset) {
-      matrix.forEach((row, y) => {
-        row.forEach((value, x) => {
-          if (value !== 0) {
-            context.fillStyle = colors[value];
-            context.fillRect(x + offset.x, y + offset.y, 1, 1);
-          }
-        });
-      });
-    }
-
-    function draw() {
-      context.fillStyle = '#000';
-      context.fillRect(0, 0, canvas.width / 20, canvas.height / 20);
-      drawMatrix(arena, {x: 0, y: 0});
-      drawMatrix(player.matrix, player.pos);
-    }
-
-    function merge(arena, player) {
-      player.matrix.forEach((row, y) => {
-        row.forEach((value, x) => {
-          if (value !== 0) {
-            arena[y + player.pos.y][x + player.pos.x] = value;
-          }
-        });
-      });
-    }
-
-    function collide(arena, player) {
-      const [m, o] = [player.matrix, player.pos];
-      for (let y = 0; y < m.length; ++y) {
-        for (let x = 0; x < m[y].length; ++x) {
-          if (m[y][x] !== 0 && (arena[y + o.y] && arena[y + o.y][x + o.x]) !== 0) {
-            return true;
-          }
+  function drawBoard() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for(let r=0; r<ROWS; r++) {
+      for(let c=0; c<COLS; c++) {
+        if(board[r][c]) {
+          drawBlock(c, r, COLORS[board[r][c]]);
         }
+      }
+    }
+  }
+
+  function drawPiece(piece, context=ctx) {
+    piece.shape.forEach((row, y) => {
+      row.forEach((value, x) => {
+        if(value) {
+          drawBlock(piece.x + x, piece.y + y, piece.color, context);
+        }
+      });
+    });
+  }
+
+  function drawNextPiece() {
+    nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
+    if(!nextPiece) return;
+    nextPiece.shape.forEach((row, y) => {
+      row.forEach((value, x) => {
+        if(value) {
+          nextCtx.fillStyle = nextPiece.color;
+          const size = nextCanvas.width / 4;
+          nextCtx.fillRect(x * size + 5, y * size + 5, size - 4, size - 4);
+          nextCtx.strokeStyle = 'rgba(255,255,255,0.2)';
+          nextCtx.strokeRect(x * size + 5, y * size + 5, size - 4, size - 4);
+        }
+      });
+    });
+  }
+
+  function collides(piece, board, offsetX, offsetY) {
+    for(let y=0; y < piece.shape.length; y++) {
+      for(let x=0; x < piece.shape[y].length; x++) {
+        if(piece.shape[y][x]) {
+          const newX = piece.x + x + offsetX;
+          const newY = piece.y + y + offsetY;
+          if(newX < 0 || newX >= COLS || newY >= ROWS) return true;
+          if(newY >= 0 && board[newY][newX]) return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  function mergePiece(piece, board) {
+    piece.shape.forEach((row, y) => {
+      row.forEach((value, x) => {
+        if(value && piece.y + y >= 0) {
+          board[piece.y + y][piece.x + x] = piece.id;
+        }
+      });
+    });
+  }
+
+  function rotate(piece) {
+    const newShape = [];
+    const rows = piece.shape.length;
+    const cols = piece.shape[0].length;
+    for(let x=0; x<cols; x++) {
+      newShape[x] = [];
+      for(let y=rows-1; y>=0; y--) {
+        newShape[x][rows - 1 - y] = piece.shape[y][x];
+      }
+    }
+    return newShape;
+  }
+
+  function rotatePiece() {
+    if(isPaused || gameOver) return;
+    const rotatedShape = rotate(currentPiece);
+    const originalShape = currentPiece.shape;
+    currentPiece.shape = rotatedShape;
+    if(collides(currentPiece, board, 0, 0)) {
+      currentPiece.shape = originalShape; // คืนรูปเดิมถ้าชน
+      playSound('fail');
+    } else {
+      playSound('rotate');
+    }
+    draw();
+  }
+
+  function movePiece(offsetX, offsetY) {
+    if(isPaused || gameOver) return;
+    if(!collides(currentPiece, board, offsetX, offsetY)) {
+      currentPiece.x += offsetX;
+      currentPiece.y += offsetY;
+      playSound(offsetY === 1 ? 'down' : 'move');
+      draw();
+      return true;
+    } else {
+      if(offsetY === 1) { // ถ้าบล็อกตกแล้วชน
+        lockPiece();
       }
       return false;
     }
+  }
 
-    function playerReset() {
-      const pieces = 'TJLOSZI';
-      player.matrix = player.next || createPiece(pieces[Math.floor(Math.random() * pieces.length)]);
-      player.next = createPiece(pieces[Math.floor(Math.random() * pieces.length)]);
-      player.pos.y = 0;
-      player.pos.x = Math.floor(arena[0].length / 2) - Math.floor(player.matrix[0].length / 2);
-      updateNextPiece();
-      if (collide(arena, player)) {
-        gameOverScreen.style.display = 'flex';
-        cancelAnimationFrame(animationId);
-        gameOverSound.play();
-        gameStarted = false;
+  function lockPiece() {
+    mergePiece(currentPiece, board);
+    clearLines();
+    spawnNextPiece();
+    if(collides(currentPiece, board, 0, 0)) {
+      // เกมจบ
+      gameOver = true;
+      showGameOver();
+      playSound('gameover');
+    }
+  }
+
+function clearLines() {
+  let lines = 0;
+  outer: for (let y = ROWS - 1; y >= 0; y--) {
+    for (let x = 0; x < COLS; x++) {
+      if (!board[y][x]) continue outer;
+    }
+    // ถ้าแถวเต็ม
+    board.splice(y, 1); // ลบแถวนั้น
+    board.unshift(new Array(COLS).fill(0)); // เพิ่มแถวว่างด้านบน
+    lines++;
+    y++; // ตรวจแถวเดิมอีกครั้ง (เพราะเลื่อนแถวลงมาแล้ว)
+  }
+
+  if (lines > 0) {
+  linesCleared += lines;
+  score += lines * 100 * level;
+
+  // เพิ่ม level เฉพาะเมื่อเคลียร์ครบ 10 แถว
+  const newLevel = Math.floor(linesCleared / 10) + 1;
+  if (newLevel !== level) {
+    level = newLevel;
+    dropInterval = Math.max(100, 1500 - (level - 1) * 80);
+  }
+
+  scoreEl.textContent = score;
+  levelEl.textContent = level;
+  playSound('clear');
+}
+
+}
+
+  
+
+  function spawnNextPiece() {
+    currentPiece = nextPiece;
+    currentX = currentPiece.x;
+    currentY = currentPiece.y;
+    nextPiece = randomPiece();
+    drawNextPiece();
+  }
+
+  function updateScoreLevel() {
+    scoreEl.textContent = score;
+    levelEl.textContent = level;
+  }
+
+  function draw() {
+    drawBoard();
+    drawPiece(currentPiece);
+  }
+
+  function gameLoop(timestamp) {
+    if(gameOver || isPaused) {
+      animationFrameId = requestAnimationFrame(gameLoop);
+      return;
+    }
+    if(!lastDropTime) lastDropTime = timestamp;
+    const delta = timestamp - lastDropTime;
+    if(delta > dropInterval) {
+      if(!movePiece(0,1)) {
+        // ไม่สามารถเลื่อนลงได้
       }
+      lastDropTime = timestamp;
     }
+    draw();
+    animationFrameId = requestAnimationFrame(gameLoop);
+  }
 
-    function updateNextPiece() {
-      nextPieceElement.innerText = 'Next:\n';
-      player.next.forEach(row => {
-        nextPieceElement.innerText += row.map(v => v ? '█' : ' ').join(' ') + '\n';
-      });
+  function startGame() {
+    resetBoard();
+    score = 0;
+    level = 1;
+    linesCleared = 0;
+    dropInterval = 1000;
+    lastDropTime = 0;
+    gameOver = false;
+    isPaused = false;
+    currentPiece = randomPiece();
+    nextPiece = randomPiece();
+    drawNextPiece();
+    updateScoreLevel();
+    menuScreen.style.display = 'none';
+    gameOverlay.style.display = 'none';
+    scoreLevelDiv.style.display = 'block';
+    gameContainer.style.display = 'flex';
+    controls.style.display = 'flex';
+    pauseBtn.style.display = 'inline-block';
+    resumeBtn.style.display = 'none';
+    animationFrameId = requestAnimationFrame(gameLoop);
+    playSound('start');
+  }
+
+  function showGameOver() {
+    gameOverlay.style.display = 'flex';
+  }
+
+  function pauseGame() {
+    if(gameOver) return;
+    isPaused = true;
+    pauseBtn.style.display = 'none';
+    resumeBtn.style.display = 'inline-block';
+    playSound('pause');
+  }
+
+  function resumeGame() {
+    if(gameOver) return;
+    isPaused = false;
+    lastDropTime = performance.now();
+    pauseBtn.style.display = 'inline-block';
+    resumeBtn.style.display = 'none';
+    playSound('resume');
+  }
+
+  // การเล่นเสียง (เปลี่ยนตามไฟล์จริงถ้ามี)
+  const sounds = {
+    move: new Audio('sounds/move.wav'),
+    rotate: new Audio('sounds/rotate.wav'),
+    down: new Audio('sounds/down.wav'),
+    clear: new Audio('sounds/clear.wav'),
+    fail: new Audio(),
+    start: new Audio('sounds/start.wav'),
+    pause: new Audio(),
+    resume: new Audio(),
+    gameover: new Audio('sounds/gameover.wav'),
+  };
+  // ตัวอย่าง: ใส่ src ไฟล์เสียงที่มีจริงได้ เช่น
+  // sounds.move.src = 'sounds/move.mp3';
+  // sounds.move.load();
+
+  function playSound(name) {
+    const sound = sounds[name];
+    if(sound && !sound.paused) {
+      // ถ้าเล่นซ้อน ๆ ให้หยุดก่อนเล่นใหม่
+      sound.pause();
+      sound.currentTime = 0;
     }
-
-    function playerDrop() {
-      player.pos.y++;
-      if (collide(arena, player)) {
-        player.pos.y--;
-        merge(arena, player);
-        playerReset();
-        arenaSweep();
-      }
-      dropSound.play();
-      dropCounter = 0;
+    if(sound) {
+      sound.play().catch(() => {});
     }
+  }
 
-    function playerMove(dir) {
-      player.pos.x += dir;
-      if (collide(arena, player)) {
-        player.pos.x -= dir;
-      } else {
-        moveSound.play();
-      }
-    }
+  // Event listeners ปุ่มควบคุม
+  startBtn.addEventListener('click', startGame);
+  restartBtn.addEventListener('click', () => {
+    gameOverlay.style.display = 'none';
+    startGame();
+  });
 
-    function playerRotate() {
-      const m = player.matrix;
-      const pos = player.pos.x;
-      let offset = 1;
+  pauseBtn.addEventListener('click', pauseGame);
+  resumeBtn.addEventListener('click', resumeGame);
 
-      // Rotate
-      for (let y = 0; y < m.length; ++y) {
-        for (let x = 0; x < y; ++x) {
-          [m[x][y], m[y][x]] = [m[y][x], m[x][y]];
-        }
-      }
-      m.forEach(row => row.reverse());
+  document.getElementById('leftBtn').addEventListener('click', () => movePiece(-1,0));
+  document.getElementById('rightBtn').addEventListener('click', () => movePiece(1,0));
+  document.getElementById('rotateBtn').addEventListener('click', rotatePiece);
+  document.getElementById('downBtn').addEventListener('click', () => movePiece(0,1));
 
-      while (collide(arena, player)) {
-        player.pos.x += offset;
-        offset = -(offset + (offset > 0 ? 1 : -1));
-        if (offset > m[0].length) {
-          // Undo rotation
-          for (let y = 0; y < m.length; ++y) {
-            for (let x = 0; x < y; ++x) {
-              [m[x][y], m[y][x]] = [m[y][x], m[x][y]];
-            }
-          }
-          m.reverse();
-          player.pos.x = pos;
-          return;
-        }
-      }
-      moveSound.play();
-    }
+  // ป้องกันการ scroll บนมือถือขณะเล่น (touchmove)
+  window.addEventListener('touchmove', function(e){
+    if(controls.contains(e.target)) e.preventDefault();
+  }, { passive:false });
 
-    function arenaSweep() {
-      outer: for (let y = arena.length - 1; y >= 0; --y) {
-        for (let x = 0; x < arena[y].length; ++x) {
-          if (arena[y][x] === 0) {
-            continue outer;
-          }
-        }
-        const row = arena.splice(y, 1)[0].fill(0);
-        arena.unshift(row);
-        y++;
-        player.score += 10;
-        updateScore();
-        clearSound.play();
-      }
-    }
-
-    function updateScore() {
-      scoreElement.innerText = player.score;
-    }
-
-    let dropCounter = 0;
-    let dropInterval = 1000;
-    let lastTime = 0;
-
-    function update(time = 0) {
-      if (!paused) {
-        const deltaTime = time - lastTime;
-        lastTime = time;
-        dropCounter += deltaTime;
-        if (dropCounter > dropInterval) {
-          playerDrop();
-        }
-        draw();
-      }
-      animationId = requestAnimationFrame(update);
-    }
-
-    function togglePause() {
-      paused = !paused;
-    }
-
-    function startGame() {
-      arena.forEach(row => row.fill(0));
-      player.score = 0;
-      updateScore();
-      startScreen.style.display = 'none';
-      gameOverScreen.style.display = 'none';
-      gameStarted = true;
-      player.next = null;
-      playerReset();
-      update();
-    }
-
-    document.addEventListener('keydown', e => {
-      if (!gameStarted) return;
-      if (e.key === 'ArrowLeft') playerMove(-1);
-      else if (e.key === 'ArrowRight') playerMove(1);
-      else if (e.key === 'ArrowDown') playerDrop();
-      else if (e.key === 'ArrowUp') playerRotate();
-    });
-
-    function move(dir) { playerMove(dir); }
-    function rotate() { playerRotate(); }
-    function drop() { playerDrop(); }
-  </script>
+</script>
 </body>
 </html>

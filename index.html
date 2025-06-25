@@ -9,7 +9,7 @@
       box-sizing: border-box;
     }
 
-    body {
+    html, body {
       margin: 0;
       padding: 0;
       background: linear-gradient(#000, #222);
@@ -20,6 +20,8 @@
       align-items: center;
       justify-content: center;
       height: 100vh;
+      touch-action: none;
+      overflow: hidden;
     }
 
     canvas {
@@ -28,7 +30,7 @@
       display: block;
       width: 90vw;
       max-width: 90vw;
-      height: auto;
+      height: 60vh;
     }
 
     .controls, .menu {
@@ -44,8 +46,8 @@
     .controls button, .menu button {
       flex: 1;
       margin: 0 5px;
-      padding: 20px;
-      font-size: 24px;
+      padding: 30px 10px;
+      font-size: 32px;
       background: #333;
       color: white;
       border: none;
@@ -63,7 +65,10 @@
       background: rgba(0,0,0,0.5);
       padding: 10px 15px;
       border-radius: 8px;
-      font-size: 18px;
+      font-size: 20px;
+      line-height: 1.4;
+      white-space: pre;
+      font-family: monospace;
     }
 
     .score {
@@ -172,7 +177,7 @@
 
     function draw() {
       context.fillStyle = '#000';
-      context.fillRect(0, 0, canvas.width, canvas.height);
+      context.fillRect(0, 0, canvas.width / 20, canvas.height / 20);
       drawMatrix(arena, {x: 0, y: 0});
       drawMatrix(player.matrix, player.pos);
     }
@@ -214,9 +219,9 @@
     }
 
     function updateNextPiece() {
-      nextPieceElement.innerText = 'Next:';
+      nextPieceElement.innerText = 'Next:\n';
       player.next.forEach(row => {
-        nextPieceElement.innerText += '\n' + row.map(v => v ? '█' : ' ').join(' ');
+        nextPieceElement.innerText += row.map(v => v ? '█' : ' ').join(' ') + '\n';
       });
     }
 

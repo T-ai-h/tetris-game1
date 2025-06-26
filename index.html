@@ -4,16 +4,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+  <title>Tetris Mob<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
   <title>Tetris Mobile Game</title>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg-color: #000;
-      --primary: #ffffff;
+      --bg-color: linear-gradient(180deg, #11111f 0%, #1b0036 100%);
+      --primary: #fff;
       --border-color: #888;
       --button-bg: #222;
-      --button-border: #fff;
-      --button-hover: #444;
+      --button-border: #0ff;
+      --button-hover: #00f;
     }
 
     * {
@@ -31,12 +37,15 @@
       justify-content: flex-start;
       min-height: 100vh;
       padding: 10px;
+      text-shadow: 1px 1px 2px #000;
     }
 
     h1 {
-      font-size: 16px;
+      font-size: 18px;
       letter-spacing: 1px;
       margin-bottom: 20px;
+      color: #0ff;
+      text-shadow: 2px 2px 4px #000;
     }
 
     button {
@@ -46,13 +55,15 @@
       background-color: var(--button-bg);
       color: var(--primary);
       border: 2px solid var(--button-border);
-      border-radius: 6px;
+      border-radius: 10px;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: background 0.3s, transform 0.2s;
+      box-shadow: 0 0 6px #0ff;
     }
 
     button:hover {
       background-color: var(--button-hover);
+      transform: scale(1.05);
     }
 
     #menuScreen,
@@ -71,9 +82,10 @@
     }
 
     #scoreLevel {
-      font-size: 10px;
+      font-size: 11px;
       line-height: 1.5;
       text-align: center;
+      text-shadow: 1px 1px 2px #000;
     }
 
     #next {
@@ -81,6 +93,7 @@
       border: 2px solid var(--primary);
       width: 80px;
       height: 80px;
+      box-shadow: 0 0 5px #fff;
     }
 
     #gameContainer {
@@ -101,7 +114,15 @@
       max-width: 70px;
       height: 50px;
       font-size: 18px;
-      border-radius: 8px;
+      border-radius: 10px;
+      background-color: #222;
+      box-shadow: 0 0 6px #0ff;
+    }
+
+    canvas {
+      border: 2px solid #fff;
+      background-color: #000;
+      image-rendering: pixelated;
     }
 
     @media (max-width: 500px) {
@@ -124,7 +145,6 @@
     }
   </style>
 </head>
-
 <body>
   <div id="menuScreen">
     <h1>TETRIS MOBILE</h1>

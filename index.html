@@ -157,9 +157,7 @@
     <button id="resumeBtn" title="Play" aria-label="Play" style="display:none;">▶</button>
   </div>
 
-  <!-- JavaScript remains unchanged for now -->
   <script>
-  
     const canvas = document.getElementById('game');
     const ctx = canvas.getContext('2d');
     const nextCanvas = document.getElementById('next');
@@ -184,6 +182,7 @@
 
     let board = [], currentPiece, nextPiece, score = 0, level = 1, linesCleared = 0;
     let dropInterval = 1000, lastDropTime = 0, gameOver = false, isPaused = false;
+    let animationFrameId;
 
     function resetBoard() {
       board = Array.from({ length: ROWS }, () => new Array(COLS).fill(0));
@@ -235,7 +234,10 @@
         if (!isValidMove(currentPiece, 0, 0)) {
           gameOver = true;
           cancelAnimationFrame(animationFrameId);
-          alert('Game Over!');
+          gameOverlay.style.display = 'block';
+          document.getElementById('topUI').style.display = 'none';
+          document.getElementById('gameContainer').style.display = 'none';
+          document.getElementById('controls').style.display = 'none';
           return;
         }
       } else {
@@ -283,7 +285,11 @@
     }
     function startGame() {
       menuScreen.style.display = 'none';
-      gameOverlay.style.display = 'block';
+      gameOverlay.style.display = 'none';
+      document.getElementById('topUI').style.display = 'flex';
+      document.getElementById('gameContainer').style.display = 'block';
+      document.getElementById('controls').style.display = 'flex';
+
       resetBoard();
       currentPiece = randomPiece();
       nextPiece = randomPiece();
@@ -296,6 +302,7 @@
       lastDropTime = 0;
       update();
     }
+
     startBtn.onclick = startGame;
     restartBtn.onclick = startGame;
     pauseBtn.onclick = () => {

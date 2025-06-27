@@ -43,6 +43,9 @@
     .active {
       background-color: #005500;
     }
+    .fixed {
+      background-color: #222;
+    }
     .controls {
       display: grid;
       grid-template-columns: repeat(3, 50px);
@@ -76,6 +79,7 @@
     const cols = 10;
     const rows = 20;
     let board = [];
+    let interval;
 
     function createBoard() {
       board = [];
@@ -95,53 +99,113 @@
     let current = [];
     let pos = { x: 3, y: 0 };
     const shapes = [
-      [[1, 1, 1, 1]], // I
-      [[1, 1], [1, 1]], // O
-      [[0, 1, 0], [1, 1, 1]], // T
-      [[1, 0, 0], [1, 1, 1]], // L
-      [[0, 0, 1], [1, 1, 1]], // J
-      [[1, 1, 0], [0, 1, 1]], // S
-      [[0, 1, 1], [1, 1, 0]], // Z
+      [[1, 1, 1, 1]],
+      [[1, 1], [1, 1]],
+      [[0, 1, 0], [1, 1, 1]],
+      [[1, 0, 0], [1, 1, 1]],
+      [[0, 0, 1], [1, 1, 1]],
+      [[1, 1, 0], [0, 1, 1]],
+      [[0, 1, 1], [1, 1, 0]],
     ];
 
     function draw() {
-      if (!current.length) return;
       board.flat().forEach(cell => cell.classList.remove('active'));
       current.forEach((row, y) => {
         row.forEach((val, x) => {
-          if (val) board[pos.y + y]?.[pos.x + x]?.classList.add('active');
+          if (val) {
+            const cell = board[pos.y + y]?.[pos.x + x];
+            if (cell && !cell.classList.contains('fixed')) {
+              cell.classList.add('active');
+            }
+          }
+        });
+      });
+    }
+
+    function undraw() {
+      current.forEach((row, y) => {
+        row.forEach((val, x) => {
+          if (val) {
+            board[pos.y + y]?.[pos.x + x]?.classList.remove('active');
+          }
+        });
+      });
+    }
+
+    function isCollision(dx = 0, dy = 0) {
+      return current.some((row, y) => {
+        return row.some((val, x) => {
+          if (!val) return false;
+          const newY = pos.y + y + dy;
+          const newX = pos.x + x + dx;
+          if (newY >= rows || newX < 0 || newX >= cols) return true;
+          const cell = board[newY]?.[newX];
+          return cell?.classList.contains('fixed');
+        });
+      });
+    }
+
+    function lock() {
+      current.forEach((row, y) => {
+        row.forEach((val, x) => {
+          if (val) board[pos.y + y][pos.x + x].classList.add('fixed');
         });
       });
     }
 
     function moveLeft() {
-      pos.x--;
-      draw();
+      if (!isCollision(-1, 0)) {
+        undraw();
+        pos.x--;
+        draw();
+      }
     }
 
     function moveRight() {
-      pos.x++;
-      draw();
+      if (!isCollision(1, 0)) {
+        undraw();
+        pos.x++;
+        draw();
+      }
     }
 
     function drop() {
-      pos.y++;
-      draw();
+      if (!isCollision(0, 1)) {
+        undraw();
+        pos.y++;
+        draw();
+      } else {
+        lock();
+        spawn();
+      }
     }
 
     function rotate() {
-      current = current[0].map((_, i) => current.map(row => row[i])).reverse();
+      const rotated = current[0].map((_, i) => current.map(row => row[i])).reverse();
+      const old = current;
+      current = rotated;
+      if (isCollision()) current = old;
       draw();
+    }
+
+    function spawn() {
+      current = shapes[Math.floor(Math.random() * shapes.length)];
+      pos = { x: 3, y: 0 };
+      if (isCollision(0, 0)) {
+        clearInterval(interval);
+        alert('Game Over');
+      } else {
+        draw();
+      }
     }
 
     function startGame() {
+      clearInterval(interval);
       createBoard();
-      current = shapes[Math.floor(Math.random() * shapes.length)];
-      pos = { x: 3, y: 0 };
-      draw();
+      spawn();
+      interval = setInterval(drop, 500);
     }
 
-    // Keyboard support
     document.addEventListener('keydown', e => {
       if (e.key === 'ArrowLeft') moveLeft();
       if (e.key === 'ArrowRight') moveRight();

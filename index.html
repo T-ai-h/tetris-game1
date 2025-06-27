@@ -1,474 +1,154 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, maximum-scale=1" />
-<title>Tetris Classic - สวยคลาสสิก</title>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
-<style>
-  :root {
-    --bg-gradient: linear-gradient(180deg, #11111f 0%, #1b0036 100%);
-    --primary-color: #0ff;
-    --block-colors: #00ffff #ffff00 #aa00ff #00ff00 #ff0000 #0000ff #ff8000;
-  }
-  * {
-    box-sizing: border-box;
-  }
-  body {
-    margin: 0; padding: 0;
-    font-family: 'Press Start 2P', cursive;
-    background: var(--bg-gradient);
-    color: white;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 100vh;
-    user-select: none;
-  }
-  h1 {
-    margin: 20px 0 10px;
-    color: var(--primary-color);
-    text-shadow: 0 0 8px #0ff;
-  }
-  /* หน้าเริ่มเกม */
-  #startScreen {
-    margin-top: 100px;
-    text-align: center;
-  }
-  #startScreen button {
-    font-size: 18px;
-    padding: 12px 30px;
-    background: #000a;
-    border: 2px solid var(--primary-color);
-    color: var(--primary-color);
-    border-radius: 12px;
-    cursor: pointer;
-    box-shadow: 0 0 10px #0ff;
-    transition: background 0.3s ease;
-  }
-  #startScreen button:hover {
-    background: #0ff1;
-  }
-  /* เกมคอนเทนเนอร์ */
-  #gameContainer {
-    display: none;
-    margin-top: 15px;
-    display: flex;
-    gap: 20px;
-    align-items: flex-start;
-  }
-  /* แคนวาสหลัก */
-  #game {
-    border: 3px solid var(--primary-color);
-    background: #000;
-    image-rendering: pixelated;
-    width: 240px;
-    height: 400px;
-  }
-  /* แคนวาสแสดงบล็อกถัดไป */
-  #nextCanvas {
-    border: 3px solid var(--primary-color);
-    background: #000;
-    image-rendering: pixelated;
-    width: 100px;
-    height: 100px;
-  }
-  /* UI ด้านข้าง */
-  #sidebar {
-    color: var(--primary-color);
-    font-size: 12px;
-    line-height: 1.4;
-    width: 120px;
-  }
-  #sidebar h2 {
-    font-size: 14px;
-    margin-bottom: 8px;
-  }
-  #controls {
-    margin-top: 30px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
-  }
-  #controls button {
-    flex: 1 1 40px;
-    max-width: 60px;
-    height: 48px;
-    font-size: 20px;
-    background: #000a;
-    border: 2px solid var(--primary-color);
-    border-radius: 10px;
-    color: var(--primary-color);
-    cursor: pointer;
-    box-shadow: 0 0 8px #0ff;
-    user-select: none;
-  }
-  #controls button:active {
-    background: #0ff1;
-  }
-  /* ข้อความแจ้งเตือน */
-  #message {
-    position: absolute;
-    top: 10%;
-    left: 50%;
-    transform: translateX(-50%);
-    color: var(--primary-color);
-    font-size: 18px;
-    font-weight: bold;
-    text-shadow: 0 0 12px #0ff;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.4s ease;
-  }
-  #message.show {
-    opacity: 1;
-  }
-  @media (max-width: 480px) {
-    #gameContainer {
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Brick Tetris</title>
+  <style>
+    body {
+      background-color: #222;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      font-family: monospace;
+    }
+    .gameboy {
+      background: #444;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 0 30px #000 inset;
+      display: flex;
       flex-direction: column;
       align-items: center;
     }
-    #sidebar {
+    .screen {
+      background: #8fbc8f;
+      border: 5px solid #222;
+      width: 160px;
+      height: 320px;
+      margin-bottom: 20px;
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      grid-template-rows: repeat(20, 1fr);
+    }
+    .cell {
+      border: 1px solid #444;
       width: 100%;
-      margin-top: 10px;
-      text-align: center;
+      height: 100%;
+      background-color: #8fbc8f;
     }
-    #controls button {
-      max-width: 45vw;
+    .active {
+      background-color: #005500;
     }
-  }
-</style>
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(3, 50px);
+      grid-gap: 10px;
+      justify-content: center;
+    }
+    .btn {
+      background: #ccc;
+      border: 2px solid #888;
+      border-radius: 10px;
+      width: 50px;
+      height: 50px;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
-<h1>TETRIS CLASSIC</h1>
-
-<div id="startScreen">
-  <button id="startBtn">เริ่มเกม</button>
-</div>
-
-<div id="gameContainer">
-  <canvas id="game" width="12" height="20"></canvas>
-  <div id="sidebar">
-    <h2>ถัดไป</h2>
-    <canvas id="nextCanvas" width="6" height="6"></canvas>
-    <div id="scoreLevel">
-      <p>คะแนน: <span id="score">0</span></p>
-      <p>เลเวล: <span id="level">1</span></p>
-      <p>สถิติสูงสุด: <span id="highscore">0</span></p>
-    </div>
-    <div id="controls">
-      <button id="leftBtn">◀</button>
-      <button id="rotateBtn">⟳</button>
-      <button id="rightBtn">▶</button>
-      <button id="downBtn">▼</button>
+  <div class="gameboy">
+    <div class="screen" id="screen"></div>
+    <div class="controls">
+      <button class="btn" onclick="moveLeft()">◀</button>
+      <button class="btn" onclick="rotate()">⟳</button>
+      <button class="btn" onclick="moveRight()">▶</button>
+      <button class="btn" onclick="drop()">▼</button>
+      <button class="btn" onclick="startGame()">▶|</button>
     </div>
   </div>
-</div>
 
-<div id="message"></div>
+  <script>
+    const screen = document.getElementById('screen');
+    const cols = 10;
+    const rows = 20;
+    let board = [];
 
-<script>
-(() => {
-  const canvas = document.getElementById('game');
-  const ctx = canvas.getContext('2d');
-  const nextCanvas = document.getElementById('nextCanvas');
-  const nextCtx = nextCanvas.getContext('2d');
-
-  const scoreElem = document.getElementById('score');
-  const levelElem = document.getElementById('level');
-  const highscoreElem = document.getElementById('highscore');
-  const messageElem = document.getElementById('message');
-
-  const startScreen = document.getElementById('startScreen');
-  const gameContainer = document.getElementById('gameContainer');
-  const startBtn = document.getElementById('startBtn');
-
-  const ROWS = 20;
-  const COLS = 12;
-  const BLOCK_SIZE = 1; // canvas scale unit (pixelated)
-
-  canvas.style.width = '240px';
-  canvas.style.height = '400px';
-  nextCanvas.style.width = '100px';
-  nextCanvas.style.height = '100px';
-
-  let board = [];
-  let current = null;
-  let currentPos = {x: 0, y: 0};
-  let nextPiece = null;
-  let dropInterval = 1000;
-  let dropCounter = 0;
-  let lastTime = 0;
-  let score = 0;
-  let level = 1;
-  let comboCount = 0;
-  let gameOver = false;
-
-  let highscore = parseInt(localStorage.getItem('tetrisHighscore')) || 0;
-  highscoreElem.textContent = highscore;
-
-  // บล็อกรูปแบบ
-  const SHAPES = [
-    [],
-    [[1,1,1,1]],            // I
-    [[2,2],[2,2]],          // O
-    [[0,3,0],[3,3,3]],      // T
-    [[4,4,0],[0,4,4]],      // S
-    [[0,5,5],[5,5,0]],      // Z
-    [[6,0,0],[6,6,6]],      // J
-    [[0,0,7],[7,7,7]],      // L
-  ];
-
-  const COLORS = [
-    null,
-    '#00ffff', // I
-    '#ffff00', // O
-    '#aa00ff', // T
-    '#00ff00', // S
-    '#ff0000', // Z
-    '#0000ff', // J
-    '#ff8000', // L
-  ];
-
-  function createBoard() {
-    board = [];
-    for(let r=0; r<ROWS; r++) {
-      board.push(new Array(COLS).fill(0));
-    }
-  }
-
-  function drawBlock(ctx, x, y, color) {
-    ctx.fillStyle = color;
-    ctx.fillRect(x, y, 1, 1);
-    ctx.strokeStyle = '#111';
-    ctx.lineWidth = 0.05;
-    ctx.strokeRect(x, y, 1, 1);
-  }
-
-  function drawBoard() {
-    ctx.clearRect(0, 0, COLS, ROWS);
-    for(let r=0; r<ROWS; r++) {
-      for(let c=0; c<COLS; c++) {
-        if(board[r][c]) {
-          drawBlock(ctx, c, r, COLORS[board[r][c]]);
+    function createBoard() {
+      board = [];
+      screen.innerHTML = '';
+      for (let r = 0; r < rows; r++) {
+        const row = [];
+        for (let c = 0; c < cols; c++) {
+          const cell = document.createElement('div');
+          cell.classList.add('cell');
+          screen.appendChild(cell);
+          row.push(cell);
         }
+        board.push(row);
       }
     }
-  }
 
-  function drawPiece(ctx, piece, pos) {
-    piece.forEach((row, y) => {
-      row.forEach((value, x) => {
-        if(value) {
-          drawBlock(ctx, pos.x + x, pos.y + y, COLORS[value]);
-        }
+    let current = null;
+    let pos = { x: 3, y: 0 };
+    const shapes = [
+      [[1, 1, 1, 1]], // I
+      [[1, 1], [1, 1]], // O
+      [[0, 1, 0], [1, 1, 1]], // T
+      [[1, 0, 0], [1, 1, 1]], // L
+      [[0, 0, 1], [1, 1, 1]], // J
+      [[1, 1, 0], [0, 1, 1]], // S
+      [[0, 1, 1], [1, 1, 0]], // Z
+    ];
+
+    function draw() {
+      board.flat().forEach(cell => cell.classList.remove('active'));
+      current.forEach((row, y) => {
+        row.forEach((val, x) => {
+          if (val) board[pos.y + y]?.[pos.x + x]?.classList.add('active');
+        });
       });
+    }
+
+    function moveLeft() {
+      pos.x--;
+      draw();
+    }
+
+    function moveRight() {
+      pos.x++;
+      draw();
+    }
+
+    function drop() {
+      pos.y++;
+      draw();
+    }
+
+    function rotate() {
+      current = current[0].map((_, i) => current.map(row => row[i])).reverse();
+      draw();
+    }
+
+    function startGame() {
+      createBoard();
+      current = shapes[Math.floor(Math.random() * shapes.length)];
+      pos = { x: 3, y: 0 };
+      draw();
+    }
+
+    // Keyboard support
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowLeft') moveLeft();
+      if (e.key === 'ArrowRight') moveRight();
+      if (e.key === 'ArrowDown') drop();
+      if (e.key === 'ArrowUp') rotate();
     });
-  }
 
-  function drawNext() {
-    nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
-    if(nextPiece) {
-      drawPiece(nextCtx, nextPiece, {x:1, y:1});
-    }
-  }
-
-  function collide(board, piece, pos) {
-    for(let y=0; y<piece.length; y++) {
-      for(let x=0; x<piece[y].length; x++) {
-        if(piece[y][x] && (
-          !board[pos.y + y] ||
-          !board[pos.y + y][pos.x + x] ||
-          board[pos.y + y][pos.x + x] !== 0
-        )) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  function collideFix(board, piece, pos) {
-    // allow on empty (0), collide if non-zero
-    for(let y=0; y<piece.length; y++) {
-      for(let x=0; x<piece[y].length; x++) {
-        if(piece[y][x]) {
-          if(pos.y + y >= ROWS || pos.x + x < 0 || pos.x + x >= COLS || board[pos.y + y][pos.x + x] !== 0) {
-            return true;
-          }
-        }
-      }
-    }
-    return false;
-  }
-
-  function rotate(piece) {
-    const N = piece.length;
-    let result = [];
-    for(let y=0; y<N; y++) {
-      result.push([]);
-      for(let x=0; x<N; x++) {
-        result[y][x] = piece[N-1-x][y] || 0;
-      }
-    }
-    return result;
-  }
-
-  function placePiece() {
-    current.forEach((row, y) => {
-      row.forEach((value, x) => {
-        if(value) {
-          board[currentPos.y + y][currentPos.x + x] = value;
-        }
-      });
-    });
-  }
-
-  function clearLines() {
-    let linesCleared = 0;
-    outer: for(let y=ROWS-1; y>=0; y--) {
-      for(let x=0; x<COLS; x++) {
-        if(board[y][x] === 0) {
-          continue outer;
-        }
-      }
-      // แถวเต็ม ลบแถวนั้น
-      board.splice(y, 1);
-      board.unshift(new Array(COLS).fill(0));
-      linesCleared++;
-      y++;
-    }
-    if(linesCleared) {
-      score += linesCleared * 100 * level;
-      if(linesCleared > 1) {
-        showMessage(`Combo! ${linesCleared} แถว`);
-      }
-      // เลเวลขึ้นทุก 1000 คะแนน
-      if(score >= level * 1000) {
-        level++;
-        dropInterval = Math.max(200, 1000 - (level - 1) * 100);
-        showMessage(`เลเวล ${level} ขึ้น!`);
-      }
-      scoreElem.textContent = score;
-      levelElem.textContent = level;
-      updateHighscore();
-    }
-  }
-
-  function showMessage(text, duration = 2000) {
-    messageElem.textContent = text;
-    messageElem.classList.add('show');
-    setTimeout(() => {
-      messageElem.classList.remove('show');
-    }, duration);
-  }
-
-  function updateHighscore() {
-    if(score > highscore) {
-      highscore = score;
-      localStorage.setItem('tetrisHighscore', highscore);
-      highscoreElem.textContent = highscore;
-    }
-  }
-
-  function spawnPiece() {
-    current = nextPiece || randomPiece();
-    currentPos = {x: Math.floor(COLS/2) - 2, y: 0};
-    nextPiece = randomPiece();
-    drawNext();
-    if(collideFix(board, current, currentPos)) {
-      gameOver = true;
-      showMessage('เกมจบ! เริ่มใหม่');
-    }
-  }
-
-  function randomPiece() {
-    const r = Math.floor(Math.random() * (SHAPES.length - 1)) + 1;
-    return SHAPES[r].map(row => row.slice());
-  }
-
-  function move(dir) {
-    let newPos = {x: currentPos.x + dir, y: currentPos.y};
-    if(!collideFix(board, current, newPos)) {
-      currentPos = newPos;
-    }
-  }
-
-  function rotatePiece() {
-    let rotated = rotate(current);
-    if(!collideFix(board, rotated, currentPos)) {
-      current = rotated;
-    }
-  }
-
-  function drop() {
-    let newPos = {x: currentPos.x, y: currentPos.y + 1};
-    if(!collideFix(board, current, newPos)) {
-      currentPos = newPos;
-    } else {
-      placePiece();
-      clearLines();
-      spawnPiece();
-    }
-  }
-
-  function draw() {
-    drawBoard();
-    drawPiece(ctx, current, currentPos);
-  }
-
-  function update(time = 0) {
-    if(gameOver) return;
-
-    const delta = time - lastTime;
-    lastTime = time;
-    dropCounter += delta;
-    if(dropCounter > dropInterval) {
-      drop();
-      dropCounter = 0;
-    }
-    draw();
-    requestAnimationFrame(update);
-  }
-
-  // ปุ่ม
-  document.getElementById('leftBtn').onclick = () => move(-1);
-  document.getElementById('rightBtn').onclick = () => move(1);
-  document.getElementById('rotateBtn').onclick = () => rotatePiece();
-  document.getElementById('downBtn').onclick = () => drop();
-
-  window.addEventListener('keydown', e => {
-    if(gameOver) return;
-    switch(e.key) {
-      case 'ArrowLeft': move(-1); break;
-      case 'ArrowRight': move(1); break;
-      case 'ArrowUp': rotatePiece(); break;
-      case 'ArrowDown': drop(); break;
-      case ' ': drop(); break;
-    }
-  });
-
-  startBtn.onclick = () => {
-    startScreen.style.display = 'none';
-    gameContainer.style.display = 'flex';
-    resetGame();
-    update();
-  };
-
-  function resetGame() {
     createBoard();
-    score = 0;
-    level = 1;
-    dropInterval = 1000;
-    gameOver = false;
-    scoreElem.textContent = score;
-    levelElem.textContent = level;
-    spawnPiece();
-  }
-
-})();
-</script>
-
+  </script>
 </body>
 </html>

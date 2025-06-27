@@ -92,7 +92,7 @@
       }
     }
 
-    let current = null;
+    let current = [];
     let pos = { x: 3, y: 0 };
     const shapes = [
       [[1, 1, 1, 1]], // I
@@ -105,6 +105,7 @@
     ];
 
     function draw() {
+      if (!current.length) return;
       board.flat().forEach(cell => cell.classList.remove('active'));
       current.forEach((row, y) => {
         row.forEach((val, x) => {
@@ -148,7 +149,7 @@
       if (e.key === 'ArrowUp') rotate();
     });
 
-    createBoard();
+    startGame();
   </script>
 </body>
 </html>

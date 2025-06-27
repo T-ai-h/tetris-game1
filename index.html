@@ -129,7 +129,7 @@
         <button class="btn" onclick="moveLeft()">◀</button>
         <button class="btn" onclick="rotate()">⟳</button>
         <button class="btn" onclick="moveRight()">▶</button>
-        <button class="btn" onclick="drop()">▼</button>
+        <button class="btn" onclick="dropToBottom()">▼</button>
         <button class="btn" id="startStopBtn" onclick="toggleGame()">Stop</button>
       </div>
     </div>
@@ -154,6 +154,10 @@
     </div>
   </div>
 
+  <!-- Audio elements for sounds -->
+  <audio id="dropSound" src="drop.mp3" preload="auto"></audio>
+  <audio id="lockSound" src="lock.mp3" preload="auto"></audio>
+
   <script>
     const screen = document.getElementById('screen');
     const nextScreen = document.getElementById('next');
@@ -163,6 +167,9 @@
     const startOverlay = document.getElementById('startOverlay');
     const gameOverOverlay = document.getElementById('gameOverOverlay');
     const gameContainer = document.getElementById('gameContainer');
+
+    const dropSound = document.getElementById('dropSound');
+    const lockSound = document.getElementById('lockSound');
 
     const cols = 10;
     const rows = 20;
@@ -326,10 +333,29 @@
         undraw();
         pos.y++;
         draw();
+        dropSound.currentTime = 0;
+        dropSound.play();
       } else {
         lock();
+        lockSound.currentTime = 0;
+        lockSound.play();
         spawn();
       }
+    }
+
+    // ฟังก์ชันให้บล็อกตกลงสุดทันทีพร้อมเล่นเสียง
+    function dropToBottom() {
+      while (!isCollision(0, 1)) {
+        undraw();
+        pos.y++;
+        draw();
+        dropSound.currentTime = 0;
+        dropSound.play();
+      }
+      lock();
+      lockSound.currentTime = 0;
+      lockSound.play();
+      spawn();
     }
 
     function rotate() {
@@ -399,7 +425,6 @@
       if (e.key === 'ArrowDown') drop();
       if (e.key === 'ArrowUp') rotate();
     });
-
   </script>
 </body>
 </html>

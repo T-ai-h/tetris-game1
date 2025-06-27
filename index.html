@@ -2,34 +2,37 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Brick Tetris</title>
   <style>
     body {
       background-color: #222;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
       margin: 0;
       font-family: monospace;
+      color: white;
+      display: flex;
+      height: 100vh;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
     }
-    .gameboy {
+    .game-container {
+      position: relative;
+      width: 360px;
       background: #444;
       border-radius: 20px;
       padding: 20px;
       box-shadow: 0 0 30px #000 inset;
       display: flex;
-      flex-direction: column;
-      align-items: center;
+      flex-direction: row;
+      gap: 20px;
+      user-select: none;
     }
     .screen {
       background: #8fbc8f;
       border: 5px solid #222;
       width: 160px;
       height: 320px;
-      margin-bottom: 20px;
       display: grid;
       grid-template-columns: repeat(10, 1fr);
       grid-template-rows: repeat(20, 1fr);
@@ -51,6 +54,7 @@
       grid-template-columns: repeat(3, 50px);
       grid-gap: 10px;
       justify-content: center;
+      margin-top: 20px;
     }
     .btn {
       background: #ccc;
@@ -59,27 +63,113 @@
       width: 50px;
       height: 50px;
       font-weight: bold;
+      cursor: pointer;
+      user-select: none;
+    }
+    .info {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      font-size: 14px;
+      width: 120px;
+    }
+    #next {
+      background: #8fbc8f;
+      border: 5px solid #222;
+      width: 120px;
+      height: 120px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(4, 1fr);
+      gap: 1px;
+    }
+    #next .cell {
+      border: 1px solid #444;
+      background-color: #8fbc8f;
+      width: 100%;
+      height: 100%;
+    }
+    #next .active {
+      background-color: #005500;
+    }
+
+    /* Overlay screen for start and game over */
+    .overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      border-radius: 20px;
+      z-index: 10;
+      color: white;
+      font-size: 24px;
+      user-select: none;
+    }
+    .overlay button {
+      margin-top: 20px;
+      background: #8fbc8f;
+      border: 3px solid #222;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      padding: 10px 30px;
+      cursor: pointer;
+      color: #222;
     }
   </style>
 </head>
 <body>
-  <div class="gameboy">
-    <div class="screen" id="screen"></div>
-    <div class="controls">
-      <button class="btn" onclick="moveLeft()">◀</button>
-      <button class="btn" onclick="rotate()">⟳</button>
-      <button class="btn" onclick="moveRight()">▶</button>
-      <button class="btn" onclick="drop()">▼</button>
-      <button class="btn" onclick="startGame()">▶|</button>
+  <div class="game-container" id="gameContainer">
+    <div>
+      <div class="screen" id="screen"></div>
+      <div class="controls">
+        <button class="btn" onclick="moveLeft()">◀</button>
+        <button class="btn" onclick="rotate()">⟳</button>
+        <button class="btn" onclick="moveRight()">▶</button>
+        <button class="btn" onclick="drop()">▼</button>
+        <button class="btn" id="startStopBtn" onclick="toggleGame()">Stop</button>
+      </div>
+    </div>
+
+    <div class="info">
+      <div><strong>Score:</strong> <span id="score">0</span></div>
+      <div><strong>Next:</strong></div>
+      <div id="next"></div>
+    </div>
+
+    <!-- Start Screen Overlay -->
+    <div class="overlay" id="startOverlay">
+      <div>Brick Style Tetris</div>
+      <button onclick="startGameFromOverlay()">Start Game</button>
+    </div>
+
+    <!-- Game Over Overlay -->
+    <div class="overlay" id="gameOverOverlay" style="display:none;">
+      <div>Game Over</div>
+      <div style="font-size:18px; margin-top: 10px;">Your score: <span id="finalScore">0</span></div>
+      <button onclick="startGameFromOverlay()">Play Again</button>
     </div>
   </div>
 
   <script>
     const screen = document.getElementById('screen');
+    const nextScreen = document.getElementById('next');
+    const scoreDisplay = document.getElementById('score');
+    const finalScoreDisplay = document.getElementById('finalScore');
+    const startStopBtn = document.getElementById('startStopBtn');
+    const startOverlay = document.getElementById('startOverlay');
+    const gameOverOverlay = document.getElementById('gameOverOverlay');
+    const gameContainer = document.getElementById('gameContainer');
+
     const cols = 10;
     const rows = 20;
     let board = [];
     let interval;
+    let speed = 500;
+    let gameRunning = false;
 
     function createBoard() {
       board = [];
@@ -96,6 +186,17 @@
       }
     }
 
+    function createNextBoard() {
+      nextScreen.innerHTML = '';
+      for(let r=0; r<4; r++){
+        for(let c=0; c<4; c++){
+          const cell = document.createElement('div');
+          cell.classList.add('cell');
+          nextScreen.appendChild(cell);
+        }
+      }
+    }
+
     let current = [];
     let pos = { x: 3, y: 0 };
     const shapes = [
@@ -107,6 +208,9 @@
       [[1, 1, 0], [0, 1, 1]],
       [[0, 1, 1], [1, 1, 0]],
     ];
+
+    let nextShape = [];
+    let score = 0;
 
     function draw() {
       board.flat().forEach(cell => cell.classList.remove('active'));
@@ -132,6 +236,22 @@
       });
     }
 
+    function drawNext() {
+      const cells = nextScreen.querySelectorAll('.cell');
+      cells.forEach(cell => cell.classList.remove('active'));
+
+      nextShape.forEach((row, y) => {
+        row.forEach((val, x) => {
+          if (val) {
+            const offsetX = Math.floor((4 - nextShape[0].length) / 2);
+            const offsetY = Math.floor((4 - nextShape.length) / 2);
+            const index = (y + offsetY) * 4 + (x + offsetX);
+            if(cells[index]) cells[index].classList.add('active');
+          }
+        });
+      });
+    }
+
     function isCollision(dx = 0, dy = 0) {
       return current.some((row, y) => {
         return row.some((val, x) => {
@@ -145,12 +265,44 @@
       });
     }
 
+    function clearLines() {
+      let linesCleared = 0;
+      for (let y = rows - 1; y >= 0; y--) {
+        if (board[y].every(cell => cell.classList.contains('fixed'))) {
+          board[y].forEach(cell => cell.classList.remove('fixed'));
+          // Move all rows above down
+          for (let row = y; row > 0; row--) {
+            for (let col = 0; col < cols; col++) {
+              if(board[row - 1][col].classList.contains('fixed')) {
+                board[row][col].classList.add('fixed');
+              } else {
+                board[row][col].classList.remove('fixed');
+              }
+            }
+          }
+          y++; // re-check this row after moving down
+          linesCleared++;
+        }
+      }
+      if (linesCleared > 0) {
+        score += linesCleared * 10;
+        scoreDisplay.textContent = score;
+        // Optional: speed up game after some score
+        if (speed > 100) {
+          speed -= linesCleared * 10;
+          clearInterval(interval);
+          interval = setInterval(drop, speed);
+        }
+      }
+    }
+
     function lock() {
       current.forEach((row, y) => {
         row.forEach((val, x) => {
           if (val) board[pos.y + y][pos.x + x].classList.add('fixed');
         });
       });
+      clearLines();
     }
 
     function moveLeft() {
@@ -189,11 +341,12 @@
     }
 
     function spawn() {
-      current = shapes[Math.floor(Math.random() * shapes.length)];
+      current = nextShape.length ? nextShape : shapes[Math.floor(Math.random() * shapes.length)];
+      nextShape = shapes[Math.floor(Math.random() * shapes.length)];
       pos = { x: 3, y: 0 };
+      drawNext();
       if (isCollision(0, 0)) {
-        clearInterval(interval);
-        alert('Game Over');
+        gameOver();
       } else {
         draw();
       }
@@ -202,18 +355,51 @@
     function startGame() {
       clearInterval(interval);
       createBoard();
+      createNextBoard();
+      score = 0;
+      speed = 500;
+      scoreDisplay.textContent = score;
+      nextShape = shapes[Math.floor(Math.random() * shapes.length)];
       spawn();
-      interval = setInterval(drop, 500);
+      interval = setInterval(drop, speed);
+      startStopBtn.textContent = 'Stop';
+      gameRunning = true;
+      startOverlay.style.display = 'none';
+      gameOverOverlay.style.display = 'none';
+    }
+
+    function startGameFromOverlay() {
+      startGame();
+    }
+
+    function toggleGame() {
+      if (gameRunning) {
+        clearInterval(interval);
+        startStopBtn.textContent = 'Start';
+        gameRunning = false;
+      } else {
+        interval = setInterval(drop, speed);
+        startStopBtn.textContent = 'Stop';
+        gameRunning = true;
+      }
+    }
+
+    function gameOver() {
+      clearInterval(interval);
+      gameRunning = false;
+      startStopBtn.textContent = 'Start';
+      finalScoreDisplay.textContent = score;
+      gameOverOverlay.style.display = 'flex';
     }
 
     document.addEventListener('keydown', e => {
+      if (!gameRunning) return;
       if (e.key === 'ArrowLeft') moveLeft();
       if (e.key === 'ArrowRight') moveRight();
       if (e.key === 'ArrowDown') drop();
       if (e.key === 'ArrowUp') rotate();
     });
 
-    startGame();
   </script>
 </body>
 </html>

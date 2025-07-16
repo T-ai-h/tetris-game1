@@ -184,7 +184,7 @@
     </div>
   </div>
 
-<audio id="dropSound" src=".wav" preload="auto"></audio>
+<audio id="dropSound" src="" preload="auto"></audio>
 <audio id="lockSound" src="lock.mp3" preload="auto"></audio>
 <audio id="moveSound" src="sounds/move.wav" preload="auto"></audio>
 <audio id="rotateSound" src="sounds/rotate.wav" preload="auto"></audio>
@@ -309,36 +309,79 @@
       });
     }
 
-    function clearLines() {
-      let linesCleared = 0;
-      for (let y = rows - 1; y >= 0; y--) {
-        if (board[y].every(cell => cell.classList.contains('fixed'))) {
-          board[y].forEach(cell => cell.classList.remove('fixed'));
-          // Move all rows above down
-          for (let row = y; row > 0; row--) {
-            for (let col = 0; col < cols; col++) {
-              if(board[row - 1][col].classList.contains('fixed')) {
-                board[row][col].classList.add('fixed');
-              } else {
-                board[row][col].classList.remove('fixed');
-              }
-            }
-          }
-          y++; // re-check this row after moving down
-          linesCleared++;
-        }
-      }
-      if (linesCleared > 0) {
-        score += linesCleared * 10;
-        scoreDisplay.textContent = score;
-        // Optional: speed up game after some score
-        if (speed > 100) {
-          speed -= linesCleared * 10;
-          clearInterval(interval);
-          interval = setInterval(drop, speed);
-        }
-      }
+   function clearLines() {
+  let linesToClear = [];
+  for (let y = rows - 1; y >= 0; y--) {
+    if (board[y].every(cell => cell.classList.contains('fixed'))) {
+      linesToClear.push(y);
     }
+  }
+
+  if (linesToClear.length === 0) return;
+
+  // เล่นเสียงระเบิด
+  explodeSound.currentTime = 0;
+  explodeSound.play();
+
+  blinkLines(linesToClear, 3, () => {
+    // ลบแถวหลังจากกระพริบเสร็จ
+    linesToClear.forEach(y => {
+      board[y].forEach(cell => cell.classList.remove('fixed'));
+    });
+
+    // เลื่อนแถวด้านบนลงมา
+    linesToClear.sort((a, b) => a - b).forEach(y => {
+      for (let row = y; row > 0; row--) {
+        for (let col = 0; col < cols; col++) {
+          if (board[row - 1][col].classList.contains('fixed')) {
+            board[row][col].classList.add('fixed');
+          } else {
+            board[row][col].classList.remove('fixed');
+          }
+        }
+      }
+    });
+
+    // เพิ่มคะแนนและเพิ่มความเร็วเกม
+    score += linesToClear.length * 10;
+    scoreDisplay.textContent = score;
+    if (speed > 100) {
+      speed -= linesToClear.length * 10;
+      clearInterval(interval);
+      interval = setInterval(drop, speed);
+    }
+  });
+}
+function blinkLines(lines, times, callback) {
+  let count = 0;
+  let visible = true;
+
+  const intervalBlink = setInterval(() => {
+    lines.forEach(y => {
+      board[y].forEach(cell => {
+        if (visible) {
+          cell.style.backgroundColor = '#ff5555'; // สีตอนกระพริบ
+        } else {
+          cell.style.backgroundColor = ''; // คืนสภาพเดิม
+        }
+      });
+    });
+
+    visible = !visible;
+    count++;
+    if (count >= times * 2) {
+      clearInterval(intervalBlink);
+      // เคลียร์ backgroundColor
+      lines.forEach(y => {
+        board[y].forEach(cell => {
+          cell.style.backgroundColor = '';
+        });
+      });
+      if (callback) callback();
+    }
+  }, 150); // ความเร็วกระพริบ
+}
+
 
     function lock() {
       current.forEach((row, y) => {

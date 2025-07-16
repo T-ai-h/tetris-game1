@@ -184,7 +184,7 @@
     </div>
   </div>
 
-<audio id="dropSound" src="sounds/land.wav" preload="auto"></audio>
+<audio id="dropSound" src=".wav" preload="auto"></audio>
 <audio id="lockSound" src="lock.mp3" preload="auto"></audio>
 <audio id="moveSound" src="sounds/move.wav" preload="auto"></audio>
 <audio id="rotateSound" src="sounds/rotate.wav" preload="auto"></audio>
@@ -482,7 +482,7 @@ function startGame() {
   startOverlay.style.display = 'none';
   gameOverOverlay.style.display = 'none';
   const bgm = document.getElementById('bgm');
-  bgm.volume = 0.3; // ปรับความดังตรงนี้ (0.0 - 1.0)
+  bgm.volume = 0.5; // ปรับความดังตรงนี้ (0.0 - 1.0)
   bgm.play().catch(() => {
     console.log('เสียงจะเล่นหลังจากผู้โต้ตอบ เช่น กดปุ่ม');
   });

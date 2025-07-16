@@ -463,6 +463,11 @@ function startGame() {
   gameRunning = true;
   startOverlay.style.display = 'none';
   gameOverOverlay.style.display = 'none';
+  const bgm = document.getElementById('bgm');
+  bgm.volume = 0.3; // ปรับความดังตรงนี้ (0.0 - 1.0)
+  bgm.play().catch(() => {
+    console.log('เสียงจะเล่นหลังจากผู้โต้ตอบ เช่น กดปุ่ม');
+  });
 
   // เริ่มเล่น BGM ถ้ายังไม่ได้ mute
   if (!isMuted) {

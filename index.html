@@ -256,17 +256,19 @@
     let nextShape = [];
     let score = 0;
 
-function draw(shape, row, col) {
-  shape.forEach((r, y) => {
-    r.forEach((value, x) => {
-      if (value && board[row + y] && board[row + y][col + x]) {
-        board[row + y][col + x].classList.add('fixed');
-        board[row + y][col + x].style.backgroundColor = currentColor;
-      }
-    });
-  });
-}
-
+    function draw() {
+      board.flat().forEach(cell => cell.classList.remove('active'));
+      current.forEach((row, y) => {
+        row.forEach((val, x) => {
+          if (val) {
+            const cell = board[pos.y + y]?.[pos.x + x];
+            if (cell && !cell.classList.contains('fixed')) {
+              cell.classList.add('active');
+            }
+          }
+        });
+      });
+    }
 
     function undraw() {
       current.forEach((row, y) => {
@@ -443,22 +445,18 @@ function blinkLines(lines, times, callback) {
       if (isCollision()) current = old;
       draw();
     }
-let currentColor = '#ffffff'; // ตั้งค่าเริ่มต้น
 
-function spawn() {
-  currentShape = nextShape;
-  nextShape = shapes[Math.floor(Math.random() * shapes.length)];
-  currentColor = pastelColors[Math.floor(Math.random() * pastelColors.length)];
-
-  current = {
-    shape: currentShape.shape,
-    row: 0,
-    col: Math.floor(cols / 2) - 1
-  };
-
-  draw(current.shape, current.row, current.col);
-}
-
+    function spawn() {
+      current = nextShape.length ? nextShape : shapes[Math.floor(Math.random() * shapes.length)];
+      nextShape = shapes[Math.floor(Math.random() * shapes.length)];
+      pos = { x: 3, y: 0 };
+      drawNext();
+      if (isCollision(0, 0)) {
+        gameOver();
+      } else {
+        draw();
+      }
+    }
 
     function startGame() {
       clearInterval(interval);
@@ -627,7 +625,6 @@ if (board[y].every(cell => cell.classList.contains('fixed'))) {
   linesCleared++;
 }
 
-const pastelColors = ['#a2d2ff', '#ffc8dd', '#cdb4db', '#b5ead7', '#ffdac1', '#e2f0cb', '#fde2e4'];
 
   </script>
 </body>

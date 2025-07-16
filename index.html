@@ -5,6 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Brick Tetris</title>
   <style>
+    .btn-sound {
+  background: #8fbc8f;
+  border: 2px solid #222;
+  border-radius: 10px;
+  font-size: 20px;
+  padding: 5px 10px;
+  cursor: pointer;
+  color: #222;
+  width: 50px;
+  height: 50px;
+  transition: background 0.2s, transform 0.2s;
+}
+.btn-sound:hover {
+  background: #aaddaa;
+  transform: scale(1.1);
+}
+
     body {
       background-color: #222;
       margin: 0;
@@ -131,9 +148,12 @@
         <button class="btn" onclick="moveRight()">▶</button>
         <button class="btn" onclick="dropToBottom()">▼</button>
         <button class="btn" id="startStopBtn" onclick="toggleGame()">Stop</button>
-        <button id="muteBtn" onclick="toggleMute()">🔊</button>
       </div>
     </div>
+
+    <div><strong>Sound:</strong>
+  <button id="muteBtn" onclick="toggleMute()" class="btn-sound">🔊</button>
+</div>
 
     <div class="info">
       <div><strong>Score:</strong> <span id="score">0</span></div>
@@ -155,9 +175,9 @@
     </div>
   </div>
 
-  <audio id="bgm" src="black.mp3" preload="auto" loop></audio>
-  <audio id="dropSound" src="drop.mp3" preload="auto"></audio>
-  <audio id="lockSound" src="lock.mp3" preload="auto"></audio>
+  <audio id="bgm" src="sounds/black.mp3" preload="auto" loop></audio>
+  <audio id="dropSound" src="drop.wav" preload="auto"></audio>
+  <audio id="lockSound" src="lock.wav" preload="auto"></audio>
 
   <script>
     const screen = document.getElementById('screen');

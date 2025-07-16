@@ -131,6 +131,7 @@
         <button class="btn" onclick="moveRight()">▶</button>
         <button class="btn" onclick="dropToBottom()">▼</button>
         <button class="btn" id="startStopBtn" onclick="toggleGame()">Stop</button>
+        <button id="muteBtn" onclick="toggleMute()">🔊</button>
       </div>
     </div>
 
@@ -154,7 +155,7 @@
     </div>
   </div>
 
-  <!-- Audio elements for sounds -->
+  <audio id="bgm" src="black.mp3" preload="auto" loop></audio>
   <audio id="dropSound" src="drop.mp3" preload="auto"></audio>
   <audio id="lockSound" src="lock.mp3" preload="auto"></audio>
 
@@ -425,6 +426,55 @@
       if (e.key === 'ArrowDown') drop();
       if (e.key === 'ArrowUp') rotate();
     });
+    const bgm = document.getElementById('bgm');
+const muteBtn = document.getElementById('muteBtn');
+let isMuted = false;
+
+// เล่น BGM ตอนเริ่มเกม
+function startGame() {
+  clearInterval(interval);
+  createBoard();
+  createNextBoard();
+  score = 0;
+  speed = 500;
+  scoreDisplay.textContent = score;
+  nextShape = shapes[Math.floor(Math.random() * shapes.length)];
+  spawn();
+  interval = setInterval(drop, speed);
+  startStopBtn.textContent = 'Stop';
+  gameRunning = true;
+  startOverlay.style.display = 'none';
+  gameOverOverlay.style.display = 'none';
+
+  // เริ่มเล่น BGM ถ้ายังไม่ได้ mute
+  if (!isMuted) {
+    bgm.currentTime = 0;
+    bgm.play();
+  }
+}
+
+// ปิด BGM ตอน Game Over
+function gameOver() {
+  clearInterval(interval);
+  gameRunning = false;
+  startStopBtn.textContent = 'Start';
+  finalScoreDisplay.textContent = score;
+  gameOverOverlay.style.display = 'flex';
+
+  bgm.pause();
+}
+
+// ปุ่ม toggle mute/unmute
+function toggleMute() {
+  isMuted = !isMuted;
+  if (isMuted) {
+    bgm.pause();
+    muteBtn.textContent = '🔇';
+  } else {
+    bgm.play();
+    muteBtn.textContent = '🔊';
+  }
+}
   </script>
 </body>
 </html>

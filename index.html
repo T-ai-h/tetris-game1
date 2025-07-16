@@ -5,6 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Brick Tetris</title>
   <style>
+    .cell {
+  border: 1px solid #444;
+  width: 100%;
+  height: 100%;
+  background-color: #b0e0e6; /* เปลี่ยนเป็นฟ้าซอฟต์ */
+}
+.active {
+  background-color: #007777;
+}
+.fixed {
+  background-color: #333;
+}
+
     .btn-sound {
   background: #8fbc8f;
   border: 2px solid #222;
@@ -148,9 +161,7 @@
         <button class="btn" onclick="moveRight()">▶</button>
         <button class="btn" onclick="dropToBottom()">▼</button>
         <button class="btn" id="startStopBtn" onclick="toggleGame()">Stop</button>
-            <div><strong>Sound:</strong>
-  <button id="muteBtn" onclick="toggleMute()" class="btn-sound">🔊</button>
-</div>
+        <button id="muteBtn" onclick="toggleMute()" class="btn-sound">🔊</button>
       </div>
     </div>
     <div class="info">
@@ -173,11 +184,19 @@
     </div>
   </div>
 
+<audio id="dropSound" src="sounds/land.wav" preload="auto"></audio>
+<audio id="lockSound" src="lock.mp3" preload="auto"></audio>
+<audio id="moveSound" src="sounds/move.wav" preload="auto"></audio>
+<audio id="rotateSound" src="sounds/rotate.wav" preload="auto"></audio>
+<audio id="explodeSound" src="sounds/clear.wav" preload="auto"></audio>
+<audio id="gameOverSound" src="sounds/gameover.wav" preload="auto"></audio>
   <audio id="bgm" src="sounds/black.mp3" preload="auto" loop></audio>
-  <audio id="dropSound" src="drop.wav" preload="auto"></audio>
-  <audio id="lockSound" src="lock.wav" preload="auto"></audio>
 
   <script>
+    const moveSound = document.getElementById('moveSound');
+    const rotateSound = document.getElementById('rotateSound');
+    const explodeSound = document.getElementById('explodeSound');
+    const gameOverSound = document.getElementById('gameOverSound');
     const screen = document.getElementById('screen');
     const nextScreen = document.getElementById('next');
     const scoreDisplay = document.getElementById('score');
@@ -186,7 +205,6 @@
     const startOverlay = document.getElementById('startOverlay');
     const gameOverOverlay = document.getElementById('gameOverOverlay');
     const gameContainer = document.getElementById('gameContainer');
-
     const dropSound = document.getElementById('dropSound');
     const lockSound = document.getElementById('lockSound');
 
@@ -498,6 +516,72 @@ function toggleMute() {
     muteBtn.textContent = '🔊';
   }
 }
+function moveLeft() {
+  if (!isCollision(-1, 0)) {
+    undraw();
+    pos.x--;
+    draw();
+    moveSound.currentTime = 0;
+    moveSound.play();
+  }
+}
+
+function moveRight() {
+  if (!isCollision(1, 0)) {
+    undraw();
+    pos.x++;
+    draw();
+    moveSound.currentTime = 0;
+    moveSound.play();
+  }
+}
+function rotate() {
+  const rotated = current[0].map((_, i) => current.map(row => row[i])).reverse();
+  const old = current;
+  current = rotated;
+  if (isCollision()) {
+    current = old;
+  } else {
+    rotateSound.currentTime = 0;
+    rotateSound.play();
+  }
+  draw();
+}
+function gameOver() {
+  clearInterval(interval);
+  gameRunning = false;
+  startStopBtn.textContent = 'Start';
+  finalScoreDisplay.textContent = score;
+  gameOverOverlay.style.display = 'flex';
+  gameOverSound.currentTime = 0;
+  gameOverSound.play();
+}
+if (board[y].every(cell => cell.classList.contains('fixed'))) {
+  board[y].forEach(cell => {
+    cell.classList.remove('fixed');
+    cell.style.backgroundColor = '#ff4444'; // เอฟเฟกต์ระเบิด (แดง)
+  });
+  explodeSound.currentTime = 0;
+  explodeSound.play();
+
+  // รอ 100ms ค่อยลบจริง
+  setTimeout(() => {
+    for (let row = y; row > 0; row--) {
+      for (let col = 0; col < cols; col++) {
+        board[row][col].style.backgroundColor = '';
+        if (board[row - 1][col].classList.contains('fixed')) {
+          board[row][col].classList.add('fixed');
+        } else {
+          board[row][col].classList.remove('fixed');
+        }
+      }
+    }
+  }, 100);
+
+  y++; // ตรวจซ้ำ
+  linesCleared++;
+}
+
   </script>
 </body>
 </html>

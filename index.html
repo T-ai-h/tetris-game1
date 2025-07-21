@@ -392,57 +392,59 @@ function blinkLines(lines, times, callback) {
       clearLines();
     }
 
- function moveLeft() {
-  if (!gameRunning) return;
-  if (!isCollision(-1, 0)) {
-    undraw();
-    pos.x--;
-    draw();
-    moveSound.currentTime = 0;
-    moveSound.play();
-  }
-}
+    function moveLeft() {
+      if (!isCollision(-1, 0)) {
+        undraw();
+        pos.x--;
+        draw();
+      }
+    }
 
-function moveRight() {
-  if (!gameRunning) return;
-  if (!isCollision(1, 0)) {
-    undraw();
-    pos.x++;
-    draw();
-    moveSound.currentTime = 0;
-    moveSound.play();
-  }
-}
+    function moveRight() {
+      if (!isCollision(1, 0)) {
+        undraw();
+        pos.x++;
+        draw();
+      }
+    }
 
-function rotate() {
-  if (!gameRunning) return;
-  const rotated = current[0].map((_, i) => current.map(row => row[i])).reverse();
-  const old = current;
-  current = rotated;
-  if (isCollision()) {
-    current = old;
-  } else {
-    rotateSound.currentTime = 0;
-    rotateSound.play();
-  }
-  draw();
-}
+    function drop() {
+      if (!isCollision(0, 1)) {
+        undraw();
+        pos.y++;
+        draw();
+        dropSound.currentTime = 0;
+        dropSound.play();
+      } else {
+        lock();
+        lockSound.currentTime = 0;
+        lockSound.play();
+        spawn();
+      }
+    }
 
-function dropToBottom() {
-  if (!gameRunning) return;
-  while (!isCollision(0, 1)) {
-    undraw();
-    pos.y++;
-    draw();
-    dropSound.currentTime = 0;
-    dropSound.play();
-  }
-  lock();
-  lockSound.currentTime = 0;
-  lockSound.play();
-  spawn();
-}
+    // ฟังก์ชันให้บล็อกตกลงสุดทันทีพร้อมเล่นเสียง
+    function dropToBottom() {
+      while (!isCollision(0, 1)) {
+        undraw();
+        pos.y++;
+        draw();
+        dropSound.currentTime = 0;
+        dropSound.play();
+      }
+      lock();
+      lockSound.currentTime = 0;
+      lockSound.play();
+      spawn();
+    }
 
+    function rotate() {
+      const rotated = current[0].map((_, i) => current.map(row => row[i])).reverse();
+      const old = current;
+      current = rotated;
+      if (isCollision()) current = old;
+      draw();
+    }
 
     function spawn() {
       current = nextShape.length ? nextShape : shapes[Math.floor(Math.random() * shapes.length)];
@@ -507,6 +509,7 @@ function dropToBottom() {
 const muteBtn = document.getElementById('muteBtn');
 let isMuted = false;
 
+// เล่น BGM ตอนเริ่มเกม
 function startGame() {
   clearInterval(interval);
   createBoard();
@@ -521,17 +524,18 @@ function startGame() {
   gameRunning = true;
   startOverlay.style.display = 'none';
   gameOverOverlay.style.display = 'none';
+  const bgm = document.getElementById('bgm');
+  bgm.volume = 0.5; // ปรับความดังตรงนี้ (0.0 - 1.0)
+  bgm.play().catch(() => {
+    console.log('เสียงจะเล่นหลังจากผู้โต้ตอบ เช่น กดปุ่ม');
+  });
 
-  // เริ่ม BGM
-  bgm.volume = 0.5;
+  // เริ่มเล่น BGM ถ้ายังไม่ได้ mute
   if (!isMuted) {
     bgm.currentTime = 0;
-    bgm.play().catch(() => {
-      console.log('เสียงจะเล่นหลังจากผู้โต้ตอบ เช่น กดปุ่ม');
-    });
+    bgm.play();
   }
 }
-
 
 // ปิด BGM ตอน Game Over
 function gameOver() {

@@ -507,7 +507,6 @@ function dropToBottom() {
 const muteBtn = document.getElementById('muteBtn');
 let isMuted = false;
 
-// เล่น BGM ตอนเริ่มเกม
 function startGame() {
   clearInterval(interval);
   createBoard();
@@ -522,18 +521,17 @@ function startGame() {
   gameRunning = true;
   startOverlay.style.display = 'none';
   gameOverOverlay.style.display = 'none';
-  const bgm = document.getElementById('bgm');
-  bgm.volume = 0.5; // ปรับความดังตรงนี้ (0.0 - 1.0)
-  bgm.play().catch(() => {
-    console.log('เสียงจะเล่นหลังจากผู้โต้ตอบ เช่น กดปุ่ม');
-  });
 
-  // เริ่มเล่น BGM ถ้ายังไม่ได้ mute
+  // เริ่ม BGM
+  bgm.volume = 0.5;
   if (!isMuted) {
     bgm.currentTime = 0;
-    bgm.play();
+    bgm.play().catch(() => {
+      console.log('เสียงจะเล่นหลังจากผู้โต้ตอบ เช่น กดปุ่ม');
+    });
   }
 }
+
 
 // ปิด BGM ตอน Game Over
 function gameOver() {

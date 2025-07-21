@@ -392,59 +392,57 @@ function blinkLines(lines, times, callback) {
       clearLines();
     }
 
-    function moveLeft() {
-      if (!isCollision(-1, 0)) {
-        undraw();
-        pos.x--;
-        draw();
-      }
-    }
+ function moveLeft() {
+  if (!gameRunning) return;
+  if (!isCollision(-1, 0)) {
+    undraw();
+    pos.x--;
+    draw();
+    moveSound.currentTime = 0;
+    moveSound.play();
+  }
+}
 
-    function moveRight() {
-      if (!isCollision(1, 0)) {
-        undraw();
-        pos.x++;
-        draw();
-      }
-    }
+function moveRight() {
+  if (!gameRunning) return;
+  if (!isCollision(1, 0)) {
+    undraw();
+    pos.x++;
+    draw();
+    moveSound.currentTime = 0;
+    moveSound.play();
+  }
+}
 
-    function drop() {
-      if (!isCollision(0, 1)) {
-        undraw();
-        pos.y++;
-        draw();
-        dropSound.currentTime = 0;
-        dropSound.play();
-      } else {
-        lock();
-        lockSound.currentTime = 0;
-        lockSound.play();
-        spawn();
-      }
-    }
+function rotate() {
+  if (!gameRunning) return;
+  const rotated = current[0].map((_, i) => current.map(row => row[i])).reverse();
+  const old = current;
+  current = rotated;
+  if (isCollision()) {
+    current = old;
+  } else {
+    rotateSound.currentTime = 0;
+    rotateSound.play();
+  }
+  draw();
+}
 
-    // ฟังก์ชันให้บล็อกตกลงสุดทันทีพร้อมเล่นเสียง
-    function dropToBottom() {
-      while (!isCollision(0, 1)) {
-        undraw();
-        pos.y++;
-        draw();
-        dropSound.currentTime = 0;
-        dropSound.play();
-      }
-      lock();
-      lockSound.currentTime = 0;
-      lockSound.play();
-      spawn();
-    }
+function dropToBottom() {
+  if (!gameRunning) return;
+  while (!isCollision(0, 1)) {
+    undraw();
+    pos.y++;
+    draw();
+    dropSound.currentTime = 0;
+    dropSound.play();
+  }
+  lock();
+  lockSound.currentTime = 0;
+  lockSound.play();
+  spawn();
+}
 
-    function rotate() {
-      const rotated = current[0].map((_, i) => current.map(row => row[i])).reverse();
-      const old = current;
-      current = rotated;
-      if (isCollision()) current = old;
-      draw();
-    }
 
     function spawn() {
       current = nextShape.length ? nextShape : shapes[Math.floor(Math.random() * shapes.length)];

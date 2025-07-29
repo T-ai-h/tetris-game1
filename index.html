@@ -182,6 +182,10 @@
       <div style="font-size:18px; margin-top: 10px;">Your score: <span id="finalScore">0</span></div>
       <button onclick="startGameFromOverlay()">Play Again</button>
     </div>
+    <div class="overlay" id="pauseOverlay" style="display:none;">
+      <div>Paused</div>
+      <button onclick="toggleGame()">Resume</button>
+    </div>
   </div>
   <audio id="dropSound" src="" preload="auto"></audio>
   <audio id="lockSound" src="lock.mp3" preload="auto"></audio>
@@ -514,10 +518,12 @@ function toggleGame() {
     startStopBtn.textContent = 'Start';
     gameRunning = false;
     bgm.pause();
+    document.getElementById('pauseOverlay').style.display = 'flex'; // แสดง pause overlay
   } else {
     interval = setInterval(drop, speed);
     startStopBtn.textContent = 'Stop';
     gameRunning = true;
+    document.getElementById('pauseOverlay').style.display = 'none'; // ซ่อน pause overlay
     if (!isMuted) bgm.play().catch(() => {});
   }
 }

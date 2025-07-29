@@ -201,127 +201,130 @@
   <audio id="bgm" src="sounds/black.mp3" preload="auto" loop></audio>
 
   <script>
-    const moveSound = document.getElementById('moveSound');
-    const rotateSound = document.getElementById('rotateSound');
-    const explodeSound = document.getElementById('explodeSound');
-    const gameOverSound = document.getElementById('gameOverSound');
-    const screen = document.getElementById('screen');
-    const nextScreen = document.getElementById('next');
-    const scoreDisplay = document.getElementById('score');
-    const finalScoreDisplay = document.getElementById('finalScore');
-    const startStopBtn = document.getElementById('startStopBtn');
-    const startOverlay = document.getElementById('startOverlay');
-    const gameOverOverlay = document.getElementById('gameOverOverlay');
-    const gameContainer = document.getElementById('gameContainer');
-    const dropSound = document.getElementById('dropSound');
-    const lockSound = document.getElementById('lockSound');
+const moveSound = document.getElementById('moveSound');
+const rotateSound = document.getElementById('rotateSound');
+const explodeSound = document.getElementById('explodeSound');
+const gameOverSound = document.getElementById('gameOverSound');
+const screen = document.getElementById('screen');
+const nextScreen = document.getElementById('next');
+const scoreDisplay = document.getElementById('score');
+const finalScoreDisplay = document.getElementById('finalScore');
+const startStopBtn = document.getElementById('startStopBtn');
+const startOverlay = document.getElementById('startOverlay');
+const gameOverOverlay = document.getElementById('gameOverOverlay');
+const gameContainer = document.getElementById('gameContainer');
+const dropSound = document.getElementById('dropSound');
+const lockSound = document.getElementById('lockSound');
+const bgm = document.getElementById('bgm');
+const muteBtn = document.getElementById('muteBtn');
+let isMuted = false;
 
-    const cols = 10;
-    const rows = 20;
-    let board = [];
-    let interval;
-    let speed = 500;
-    let gameRunning = false;
+const cols = 10;
+const rows = 20;
+let board = [];
+let interval;
+let speed = 500;
+let gameRunning = false;
 
-    function createBoard() {
-      board = [];
-      screen.innerHTML = '';
-      for (let r = 0; r < rows; r++) {
-        const row = [];
-        for (let c = 0; c < cols; c++) {
-          const cell = document.createElement('div');
-          cell.classList.add('cell');
-          screen.appendChild(cell);
-          row.push(cell);
+function createBoard() {
+  board = [];
+  screen.innerHTML = '';
+  for (let r = 0; r < rows; r++) {
+    const row = [];
+    for (let c = 0; c < cols; c++) {
+      const cell = document.createElement('div');
+      cell.classList.add('cell');
+      screen.appendChild(cell);
+      row.push(cell);
+    }
+    board.push(row);
+  }
+}
+
+function createNextBoard() {
+  nextScreen.innerHTML = '';
+  for(let r=0; r<4; r++){
+    for(let c=0; c<4; c++){
+      const cell = document.createElement('div');
+      cell.classList.add('cell');
+      nextScreen.appendChild(cell);
+    }
+  }
+}
+
+let current = [];
+let pos = { x: 3, y: 0 };
+const shapes = [
+  [[1, 1, 1, 1]],
+  [[1, 1], [1, 1]],
+  [[0, 1, 0], [1, 1, 1]],
+  [[1, 0, 0], [1, 1, 1]],
+  [[0, 0, 1], [1, 1, 1]],
+  [[1, 1, 0], [0, 1, 1]],
+  [[0, 1, 1], [1, 1, 0]],
+];
+
+let nextShape = [];
+let score = 0;
+
+function draw() {
+  board.flat().forEach(cell => {
+    cell.classList.remove('active', 'tet-i', 'tet-o', 'tet-t', 'tet-l', 'tet-j', 'tet-s', 'tet-z');
+  });
+  let tetClass = getTetClass(current);
+  current.forEach((row, y) => {
+    row.forEach((val, x) => {
+      if (val) {
+        const cell = board[pos.y + y]?.[pos.x + x];
+        if (cell && !cell.classList.contains('fixed')) {
+          cell.classList.add('active', tetClass);
         }
-        board.push(row);
       }
-    }
+    });
+  });
+}
 
-    function createNextBoard() {
-      nextScreen.innerHTML = '';
-      for(let r=0; r<4; r++){
-        for(let c=0; c<4; c++){
-          const cell = document.createElement('div');
-          cell.classList.add('cell');
-          nextScreen.appendChild(cell);
-        }
+function undraw() {
+  current.forEach((row, y) => {
+    row.forEach((val, x) => {
+      if (val) {
+        board[pos.y + y]?.[pos.x + x]?.classList.remove('active');
       }
-    }
+    });
+  });
+}
 
-    let current = [];
-    let pos = { x: 3, y: 0 };
-    const shapes = [
-      [[1, 1, 1, 1]],
-      [[1, 1], [1, 1]],
-      [[0, 1, 0], [1, 1, 1]],
-      [[1, 0, 0], [1, 1, 1]],
-      [[0, 0, 1], [1, 1, 1]],
-      [[1, 1, 0], [0, 1, 1]],
-      [[0, 1, 1], [1, 1, 0]],
-    ];
+function drawNext() {
+  const cells = nextScreen.querySelectorAll('.cell');
+  cells.forEach(cell => cell.classList.remove('active', 'tet-i', 'tet-o', 'tet-t', 'tet-l', 'tet-j', 'tet-s', 'tet-z'));
 
-    let nextShape = [];
-    let score = 0;
+  let tetClass = getTetClass(nextShape);
+  nextShape.forEach((row, y) => {
+    row.forEach((val, x) => {
+      if (val) {
+        const offsetX = Math.floor((4 - nextShape[0].length) / 2);
+        const offsetY = Math.floor((4 - nextShape.length) / 2);
+        const index = (y + offsetY) * 4 + (x + offsetX);
+        if (cells[index]) cells[index].classList.add('active', tetClass);
+      }
+    });
+  });
+}
 
-    function draw() {
-      board.flat().forEach(cell => {
-        cell.classList.remove('active', 'tet-i', 'tet-o', 'tet-t', 'tet-l', 'tet-j', 'tet-s', 'tet-z');
-      });
-      let tetClass = getTetClass(current);
-      current.forEach((row, y) => {
-        row.forEach((val, x) => {
-          if (val) {
-            const cell = board[pos.y + y]?.[pos.x + x];
-            if (cell && !cell.classList.contains('fixed')) {
-              cell.classList.add('active', tetClass);
-            }
-          }
-        });
-      });
-    }
+function isCollision(dx = 0, dy = 0) {
+  return current.some((row, y) => {
+    return row.some((val, x) => {
+      if (!val) return false;
+      const newY = pos.y + y + dy;
+      const newX = pos.x + x + dx;
+      if (newY >= rows || newX < 0 || newX >= cols) return true;
+      const cell = board[newY]?.[newX];
+      return cell?.classList.contains('fixed');
+    });
+  });
+}
 
-    function undraw() {
-      current.forEach((row, y) => {
-        row.forEach((val, x) => {
-          if (val) {
-            board[pos.y + y]?.[pos.x + x]?.classList.remove('active');
-          }
-        });
-      });
-    }
-
-    function drawNext() {
-      const cells = nextScreen.querySelectorAll('.cell');
-      cells.forEach(cell => cell.classList.remove('active', 'tet-i', 'tet-o', 'tet-t', 'tet-l', 'tet-j', 'tet-s', 'tet-z'));
-
-      let tetClass = getTetClass(nextShape);
-      nextShape.forEach((row, y) => {
-        row.forEach((val, x) => {
-          if (val) {
-            const offsetX = Math.floor((4 - nextShape[0].length) / 2);
-            const offsetY = Math.floor((4 - nextShape.length) / 2);
-            const index = (y + offsetY) * 4 + (x + offsetX);
-            if (cells[index]) cells[index].classList.add('active', tetClass);
-          }
-        });
-      });
-    }
-
-    function isCollision(dx = 0, dy = 0) {
-      return current.some((row, y) => {
-        return row.some((val, x) => {
-          if (!val) return false;
-          const newY = pos.y + y + dy;
-          const newX = pos.x + x + dx;
-          if (newY >= rows || newX < 0 || newX >= cols) return true;
-          const cell = board[newY]?.[newX];
-          return cell?.classList.contains('fixed');
-        });
-      });
-    }
-
-   function clearLines() {
+function clearLines() {
   let linesToClear = [];
   for (let y = rows - 1; y >= 0; y--) {
     if (board[y].every(cell => cell.classList.contains('fixed'))) {
@@ -331,30 +334,25 @@
 
   if (linesToClear.length === 0) return;
 
-  // เล่นเสียงระเบิด
   explodeSound.currentTime = 0;
   explodeSound.play();
 
   blinkLines(linesToClear, 3, () => {
-    // ลบแถวหลังจากกระพริบเสร็จ
     linesToClear.forEach(y => {
-      board[y].forEach(cell => cell.classList.remove('fixed'));
+      board[y].forEach(cell => cell.classList.remove('fixed', 'tet-i', 'tet-o', 'tet-t', 'tet-l', 'tet-j', 'tet-s', 'tet-z'));
     });
 
-    // เลื่อนแถวด้านบนลงมา
     linesToClear.sort((a, b) => a - b).forEach(y => {
       for (let row = y; row > 0; row--) {
         for (let col = 0; col < cols; col++) {
-          if (board[row - 1][col].classList.contains('fixed')) {
-            board[row][col].classList.add('fixed');
-          } else {
-            board[row][col].classList.remove('fixed');
-          }
+          board[row][col].className = board[row - 1][col].className;
         }
+      }
+      for (let col = 0; col < cols; col++) {
+        board[0][col].className = 'cell';
       }
     });
 
-    // เพิ่มคะแนนและเพิ่มความเร็วเกม
     score += linesToClear.length * 10;
     scoreDisplay.textContent = score;
     if (speed > 100) {
@@ -364,6 +362,7 @@
     }
   });
 }
+
 function blinkLines(lines, times, callback) {
   let count = 0;
   let visible = true;
@@ -372,9 +371,9 @@ function blinkLines(lines, times, callback) {
     lines.forEach(y => {
       board[y].forEach(cell => {
         if (visible) {
-          cell.style.backgroundColor = '#ff5555'; // สีตอนกระพริบ
+          cell.style.backgroundColor = '#ff5555';
         } else {
-          cell.style.backgroundColor = ''; // คืนสภาพเดิม
+          cell.style.backgroundColor = '';
         }
       });
     });
@@ -383,7 +382,6 @@ function blinkLines(lines, times, callback) {
     count++;
     if (count >= times * 2) {
       clearInterval(intervalBlink);
-      // เคลียร์ backgroundColor
       lines.forEach(y => {
         board[y].forEach(cell => {
           cell.style.backgroundColor = '';
@@ -391,145 +389,101 @@ function blinkLines(lines, times, callback) {
       });
       if (callback) callback();
     }
-  }, 150); // ความเร็วกระพริบ
+  }, 150);
 }
 
-
-    function lock() {
-      let tetClass = getTetClass(current);
-      current.forEach((row, y) => {
-        row.forEach((val, x) => {
-          if (val) {
-            const cell = board[pos.y + y][pos.x + x];
-            cell.classList.add('fixed', tetClass);
-          }
-        });
-      });
-      clearLines();
-    }
-
-    function moveLeft() {
-      if (!isCollision(-1, 0)) {
-        undraw();
-        pos.x--;
-        draw();
-        moveSound.currentTime = 0;
-        moveSound.play();
+function lock() {
+  let tetClass = getTetClass(current);
+  current.forEach((row, y) => {
+    row.forEach((val, x) => {
+      if (val) {
+        const cell = board[pos.y + y][pos.x + x];
+        cell.classList.add('fixed', tetClass);
       }
-    }
-
-    function moveRight() {
-      if (!isCollision(1, 0)) {
-        undraw();
-        pos.x++;
-        draw();
-        moveSound.currentTime = 0;
-        moveSound.play();
-      }
-    }
-
-    function drop() {
-      if (!isCollision(0, 1)) {
-        undraw();
-        pos.y++;
-        draw();
-        dropSound.currentTime = 0;
-        dropSound.play();
-      } else {
-        lock();
-        lockSound.currentTime = 0;
-        lockSound.play();
-        spawn();
-      }
-    }
-
-    // ฟังก์ชันให้บล็อกตกลงสุดทันทีพร้อมเล่นเสียง
-    function dropToBottom() {
-      while (!isCollision(0, 1)) {
-        undraw();
-        pos.y++;
-        draw();
-        dropSound.currentTime = 0;
-        dropSound.play();
-      }
-      lock();
-      lockSound.currentTime = 0;
-      lockSound.play();
-      spawn();
-    }
-
-    function rotate() {
-      const rotated = current[0].map((_, i) => current.map(row => row[i])).reverse();
-      const old = current;
-      current = rotated;
-      if (isCollision()) current = old;
-      draw();
-    }
-
-    function spawn() {
-      current = nextShape.length ? nextShape : shapes[Math.floor(Math.random() * shapes.length)];
-      nextShape = shapes[Math.floor(Math.random() * shapes.length)];
-      pos = { x: 3, y: 0 };
-      drawNext();
-      if (isCollision(0, 0)) {
-        gameOver();
-      } else {
-        draw();
-      }
-    }
-
-    function startGame() {
-      clearInterval(interval);
-      createBoard();
-      createNextBoard();
-      score = 0;
-      speed = 500;
-      scoreDisplay.textContent = score;
-      nextShape = shapes[Math.floor(Math.random() * shapes.length)];
-      spawn();
-      interval = setInterval(drop, speed);
-      startStopBtn.textContent = 'Stop';
-      gameRunning = true;
-      startOverlay.style.display = 'none';
-      gameOverOverlay.style.display = 'none';
-    }
-
-    function startGameFromOverlay() {
-      startGame();
-    }
-
-    function toggleGame() {
-      if (gameRunning) {
-        clearInterval(interval);
-        startStopBtn.textContent = 'Start';
-        gameRunning = false;
-      } else {
-        interval = setInterval(drop, speed);
-        startStopBtn.textContent = 'Stop';
-        gameRunning = true;
-      }
-    }
-
-    function gameOver() {
-      clearInterval(interval);
-      gameRunning = false;
-      startStopBtn.textContent = 'Start';
-      finalScoreDisplay.textContent = score;
-      gameOverOverlay.style.display = 'flex';
-    }
-
-    document.addEventListener('keydown', e => {
-      if (!gameRunning) return;
-      if (e.key === 'ArrowLeft') moveLeft();
-      if (e.key === 'ArrowRight') moveRight();
-      if (e.key === 'ArrowDown') drop();
-      if (e.key === 'ArrowUp') rotate();
     });
-    const bgm = document.getElementById('bgm');
-const muteBtn = document.getElementById('muteBtn');
-let isMuted = false;
+  });
+  clearLines();
+}
 
-// เล่น BGM ตอนเริ่มเกม
+function moveLeft() {
+  if (!gameRunning) return;
+  if (!isCollision(-1, 0)) {
+    undraw();
+    pos.x--;
+    draw();
+    moveSound.currentTime = 0;
+    moveSound.play();
+  }
+}
+
+function moveRight() {
+  if (!gameRunning) return;
+  if (!isCollision(1, 0)) {
+    undraw();
+    pos.x++;
+    draw();
+    moveSound.currentTime = 0;
+    moveSound.play();
+  }
+}
+
+function drop() {
+  if (!gameRunning) return;
+  if (!isCollision(0, 1)) {
+    undraw();
+    pos.y++;
+    draw();
+    dropSound.currentTime = 0;
+    dropSound.play();
+  } else {
+    lock();
+    lockSound.currentTime = 0;
+    lockSound.play();
+    spawn();
+  }
+}
+
+function dropToBottom() {
+  if (!gameRunning) return;
+  while (!isCollision(0, 1)) {
+    undraw();
+    pos.y++;
+    draw();
+    dropSound.currentTime = 0;
+    dropSound.play();
+  }
+  lock();
+  lockSound.currentTime = 0;
+  lockSound.play();
+  spawn();
+}
+
+function rotate() {
+  if (!gameRunning) return;
+  const rotated = current[0].map((_, i) => current.map(row => row[i])).reverse();
+  const old = current;
+  current = rotated;
+  if (isCollision()) {
+    current = old;
+  } else {
+    rotateSound.currentTime = 0;
+    rotateSound.play();
+  }
+  draw();
+}
+
+function spawn() {
+  current = nextShape.length ? nextShape : shapes[Math.floor(Math.random() * shapes.length)];
+  nextShape = shapes[Math.floor(Math.random() * shapes.length)];
+  pos = { x: 3, y: 0 };
+  drawNext();
+  if (isCollision(0, 0)) {
+    gameOver();
+  } else {
+    draw();
+  }
+}
+
 function startGame() {
   clearInterval(interval);
   createBoard();
@@ -544,31 +498,42 @@ function startGame() {
   gameRunning = true;
   startOverlay.style.display = 'none';
   gameOverOverlay.style.display = 'none';
-  const bgm = document.getElementById('bgm');
-  bgm.volume = 0.5; // ปรับความดังตรงนี้ (0.0 - 1.0)
-  bgm.play().catch(() => {
-    console.log('เสียงจะเล่นหลังจากผู้โต้ตอบ เช่น กดปุ่ม');
-  });
-
-  // เริ่มเล่น BGM ถ้ายังไม่ได้ mute
+  bgm.volume = 0.5;
   if (!isMuted) {
     bgm.currentTime = 0;
-    bgm.play();
+    bgm.play().catch(() => {});
   }
 }
 
-// ปิด BGM ตอน Game Over
+function startGameFromOverlay() {
+  startGame();
+}
+
+function toggleGame() {
+  if (gameRunning) {
+    clearInterval(interval);
+    startStopBtn.textContent = 'Start';
+    gameRunning = false;
+    bgm.pause();
+  } else {
+    interval = setInterval(drop, speed);
+    startStopBtn.textContent = 'Stop';
+    gameRunning = true;
+    if (!isMuted) bgm.play().catch(() => {});
+  }
+}
+
 function gameOver() {
   clearInterval(interval);
   gameRunning = false;
   startStopBtn.textContent = 'Start';
   finalScoreDisplay.textContent = score;
   gameOverOverlay.style.display = 'flex';
-
   bgm.pause();
+  gameOverSound.currentTime = 0;
+  gameOverSound.play();
 }
 
-// ปุ่ม toggle mute/unmute
 function toggleMute() {
   isMuted = !isMuted;
   if (isMuted) {
@@ -579,86 +544,25 @@ function toggleMute() {
     muteBtn.textContent = '🔊';
   }
 }
-function moveLeft() {
-  if (!isCollision(-1, 0)) {
-    undraw();
-    pos.x--;
-    draw();
-    moveSound.currentTime = 0;
-    moveSound.play();
-  }
-}
 
-function moveRight() {
-  if (!isCollision(1, 0)) {
-    undraw();
-    pos.x++;
-    draw();
-    moveSound.currentTime = 0;
-    moveSound.play();
-  }
-}
-function rotate() {
-  const rotated = current[0].map((_, i) => current.map(row => row[i])).reverse();
-  const old = current;
-  current = rotated;
-  if (isCollision()) {
-    current = old;
-  } else {
-    rotateSound.currentTime = 0;
-    rotateSound.play();
-  }
-  draw();
-}
-function gameOver() {
-  clearInterval(interval);
-  gameRunning = false;
-  startStopBtn.textContent = 'Start';
-  finalScoreDisplay.textContent = score;
-  gameOverOverlay.style.display = 'flex';
-  gameOverSound.currentTime = 0;
-  gameOverSound.play();
-}
-if (board[y].every(cell => cell.classList.contains('fixed'))) {
-  board[y].forEach(cell => {
-    cell.classList.remove('fixed');
-    cell.style.backgroundColor = '#ff4444'; // เอฟเฟกต์ระเบิด (แดง)
-  });
-  explodeSound.currentTime = 0;
-  explodeSound.play();
-
-  // รอ 100ms ค่อยลบจริง
-  setTimeout(() => {
-    for (let row = y; row > 0; row--) {
-      for (let col = 0; col < cols; col++) {
-        board[row][col].style.backgroundColor = '';
-        if (board[row - 1][col].classList.contains('fixed')) {
-          board[row][col].classList.add('fixed');
-        } else {
-          board[row][col].classList.remove('fixed');
-        }
-      }
-    }
-  }, 100);
-
-  y++; // ตรวจซ้ำ
-  linesCleared++;
-}
-
-
-    function getTetClass(shape) {
-  // ตรวจสอบจากขนาดและรูปแบบ shape
-  if (shape.length === 1 && shape[0].length === 4) return 'tet-i'; // I
-  if (shape.length === 2 && shape[0][0] && shape[0][1] && shape[1][0] && shape[1][1]) return 'tet-o'; // O
-  if (shape.length === 2 && shape[0][1] && shape[1][0] && shape[1][1] && shape[1][2]) return 'tet-t'; // T
-  if (shape.length === 2 && shape[0][0] && !shape[0][1] && shape[1][1] && shape[1][2]) return 'tet-s'; // S
-  if (shape.length === 2 && !shape[0][0] && shape[0][1] && shape[1][0] && shape[1][1]) return 'tet-z'; // Z
-  if (shape.length === 2 && shape[0][0] && shape[0][1] && shape[1][1] && !shape[1][0]) return 'tet-l'; // L
-  if (shape.length === 2 && shape[0][1] && shape[0][0] && shape[1][0] && !shape[1][1]) return 'tet-j'; // J
+function getTetClass(shape) {
+  if (shape.length === 1 && shape[0].length === 4) return 'tet-i';
+  if (shape.length === 2 && shape[0][0] && shape[0][1] && shape[1][0] && shape[1][1]) return 'tet-o';
+  if (shape.length === 2 && shape[0][1] && shape[1][0] && shape[1][1] && shape[1][2]) return 'tet-t';
+  if (shape.length === 2 && shape[0][0] && !shape[0][1] && shape[1][1] && shape[1][2]) return 'tet-s';
+  if (shape.length === 2 && !shape[0][0] && shape[0][1] && shape[1][0] && shape[1][1]) return 'tet-z';
+  if (shape.length === 2 && shape[0][0] && shape[0][1] && shape[1][1] && !shape[1][0]) return 'tet-l';
+  if (shape.length === 2 && shape[0][1] && shape[0][0] && shape[1][0] && !shape[1][1]) return 'tet-j';
   return 'tet-t';
 }
 
-
+document.addEventListener('keydown', e => {
+  if (!gameRunning) return;
+  if (e.key === 'ArrowLeft') moveLeft();
+  if (e.key === 'ArrowRight') moveRight();
+  if (e.key === 'ArrowDown') drop();
+  if (e.key === 'ArrowUp') rotate();
+});
   </script>
 </body>
 </html>

@@ -38,3 +38,5 @@ git push
 
 
 git push
+git add .
+git commit -m "Add level up sound and update Tetris game"

@@ -195,6 +195,7 @@
   <audio id="explodeSound" src="sounds/clear.wav" preload="auto"></audio>
   <audio id="gameOverSound" src="sounds/gameover.wav" preload="auto"></audio>
   <audio id="bgm" src="sounds/black.mp3" preload="auto" loop></audio>
+  <audio id="levelUpSound" src="sounds/levelup.wav" preload="auto"></audio>
   <script>
 const moveSound = document.getElementById('moveSound');
 const rotateSound = document.getElementById('rotateSound');
@@ -212,6 +213,7 @@ const dropSound = document.getElementById('dropSound');
 const lockSound = document.getElementById('lockSound');
 const bgm = document.getElementById('bgm');
 const muteBtn = document.getElementById('muteBtn');
+const levelUpSound = document.getElementById('levelUpSound');
 let isMuted = false;
 
 const cols = 10;
@@ -358,6 +360,8 @@ function clearLines() {
     if (linesToClear.length > 0) {
       level += linesToClear.length;
       document.getElementById('level').textContent = level;
+      levelUpSound.currentTime = 0;
+      levelUpSound.play(); // เล่นเสียงเลเวลอัป
     }
     if (speed > 100) {
       speed -= linesToClear.length * 10;

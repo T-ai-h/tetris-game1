@@ -149,6 +149,14 @@
       cursor: pointer;
       color: #222;
     }
+
+    .cell.tet-i { background: #00e5ee !important; }
+.cell.tet-o { background: #ffe066 !important; }
+.cell.tet-t { background: #b266ff !important; }
+.cell.tet-l { background: #ffb347 !important; }
+.cell.tet-j { background: #3b6cff !important; }
+.cell.tet-s { background: #66ff66 !important; }
+.cell.tet-z { background: #ff6666 !important; }
   </style>
 </head>
 <body>
@@ -257,13 +265,16 @@
     let score = 0;
 
     function draw() {
-      board.flat().forEach(cell => cell.classList.remove('active'));
+      board.flat().forEach(cell => {
+        cell.classList.remove('active', 'tet-i', 'tet-o', 'tet-t', 'tet-l', 'tet-j', 'tet-s', 'tet-z');
+      });
+      let tetClass = getTetClass(current);
       current.forEach((row, y) => {
         row.forEach((val, x) => {
           if (val) {
             const cell = board[pos.y + y]?.[pos.x + x];
             if (cell && !cell.classList.contains('fixed')) {
-              cell.classList.add('active');
+              cell.classList.add('active', tetClass);
             }
           }
         });
@@ -282,15 +293,16 @@
 
     function drawNext() {
       const cells = nextScreen.querySelectorAll('.cell');
-      cells.forEach(cell => cell.classList.remove('active'));
+      cells.forEach(cell => cell.classList.remove('active', 'tet-i', 'tet-o', 'tet-t', 'tet-l', 'tet-j', 'tet-s', 'tet-z'));
 
+      let tetClass = getTetClass(nextShape);
       nextShape.forEach((row, y) => {
         row.forEach((val, x) => {
           if (val) {
             const offsetX = Math.floor((4 - nextShape[0].length) / 2);
             const offsetY = Math.floor((4 - nextShape.length) / 2);
             const index = (y + offsetY) * 4 + (x + offsetX);
-            if(cells[index]) cells[index].classList.add('active');
+            if (cells[index]) cells[index].classList.add('active', tetClass);
           }
         });
       });
@@ -384,9 +396,13 @@ function blinkLines(lines, times, callback) {
 
 
     function lock() {
+      let tetClass = getTetClass(current);
       current.forEach((row, y) => {
         row.forEach((val, x) => {
-          if (val) board[pos.y + y][pos.x + x].classList.add('fixed');
+          if (val) {
+            const cell = board[pos.y + y][pos.x + x];
+            cell.classList.add('fixed', tetClass);
+          }
         });
       });
       clearLines();
@@ -397,6 +413,8 @@ function blinkLines(lines, times, callback) {
         undraw();
         pos.x--;
         draw();
+        moveSound.currentTime = 0;
+        moveSound.play();
       }
     }
 
@@ -405,6 +423,8 @@ function blinkLines(lines, times, callback) {
         undraw();
         pos.x++;
         draw();
+        moveSound.currentTime = 0;
+        moveSound.play();
       }
     }
 
@@ -623,6 +643,19 @@ if (board[y].every(cell => cell.classList.contains('fixed'))) {
 
   y++; // ตรวจซ้ำ
   linesCleared++;
+}
+
+
+    function getTetClass(shape) {
+  // ตรวจสอบจากขนาดและรูปแบบ shape
+  if (shape.length === 1 && shape[0].length === 4) return 'tet-i'; // I
+  if (shape.length === 2 && shape[0][0] && shape[0][1] && shape[1][0] && shape[1][1]) return 'tet-o'; // O
+  if (shape.length === 2 && shape[0][1] && shape[1][0] && shape[1][1] && shape[1][2]) return 'tet-t'; // T
+  if (shape.length === 2 && shape[0][0] && !shape[0][1] && shape[1][1] && shape[1][2]) return 'tet-s'; // S
+  if (shape.length === 2 && !shape[0][0] && shape[0][1] && shape[1][0] && shape[1][1]) return 'tet-z'; // Z
+  if (shape.length === 2 && shape[0][0] && shape[0][1] && shape[1][1] && !shape[1][0]) return 'tet-l'; // L
+  if (shape.length === 2 && shape[0][1] && shape[0][0] && shape[1][0] && !shape[1][1]) return 'tet-j'; // J
+  return 'tet-t';
 }
 
 

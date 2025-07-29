@@ -6,35 +6,33 @@
   <title>Brick Tetris</title>
   <style>
     .cell {
-  border: 1px solid #444;
-  width: 100%;
-  height: 100%;
-  background-color: #b0e0e6; /* เปลี่ยนเป็นฟ้าซอฟต์ */
-}
-.active {
-  background-color: #007777;
-}
-.fixed {
-  background-color: #333;
-}
-
+      border: 1px solid #444;
+      width: 100%;
+      height: 100%;
+      background-color: #b0e0e6; /* เปลี่ยนเป็นฟ้าซอฟต์ */
+    }
+    .active {
+      background-color: #007777;
+    }
+    .fixed {
+      background-color: #333;
+    }
     .btn-sound {
-  background: #8fbc8f;
-  border: 2px solid #222;
-  border-radius: 10px;
-  font-size: 20px;
-  padding: 5px 10px;
-  cursor: pointer;
-  color: #222;
-  width: 50px;
-  height: 50px;
-  transition: background 0.2s, transform 0.2s;
-}
-.btn-sound:hover {
-  background: #aaddaa;
-  transform: scale(1.1);
-}
-
+      background: #8fbc8f;
+      border: 2px solid #222;
+      border-radius: 10px;
+      font-size: 20px;
+      padding: 5px 10px;
+      cursor: pointer;
+      color: #222;
+      width: 50px;
+      height: 50px;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .btn-sound:hover {
+      background: #aaddaa;
+      transform: scale(1.1);
+    }
     body {
       background-color: #222;
       margin: 0;
@@ -122,8 +120,6 @@
     #next .active {
       background-color: #005500;
     }
-
-    /* Overlay screen for start and game over */
     .overlay {
       position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -149,14 +145,13 @@
       cursor: pointer;
       color: #222;
     }
-
     .cell.tet-i { background: #00e5ee !important; }
-.cell.tet-o { background: #ffe066 !important; }
-.cell.tet-t { background: #b266ff !important; }
-.cell.tet-l { background: #ffb347 !important; }
-.cell.tet-j { background: #3b6cff !important; }
-.cell.tet-s { background: #66ff66 !important; }
-.cell.tet-z { background: #ff6666 !important; }
+    .cell.tet-o { background: #ffe066 !important; }
+    .cell.tet-t { background: #b266ff !important; }
+    .cell.tet-l { background: #ffb347 !important; }
+    .cell.tet-j { background: #3b6cff !important; }
+    .cell.tet-s { background: #66ff66 !important; }
+    .cell.tet-z { background: #ff6666 !important; }
   </style>
 </head>
 <body>
@@ -174,32 +169,27 @@
     </div>
     <div class="info">
       <div><strong>Score:</strong> <span id="score">0</span></div>
+      <div><strong>Level:</strong> <span id="level">1</span></div> <!-- เพิ่มบรรทัดนี้ -->
       <div><strong>Next:</strong></div>
       <div id="next"></div>
     </div>
-
-    <!-- Start Screen Overlay -->
     <div class="overlay" id="startOverlay">
       <div>Brick Style Tetris</div>
       <button onclick="startGameFromOverlay()">Start Game</button>
     </div>
-
-    <!-- Game Over Overlay -->
     <div class="overlay" id="gameOverOverlay" style="display:none;">
       <div>Game Over</div>
       <div style="font-size:18px; margin-top: 10px;">Your score: <span id="finalScore">0</span></div>
       <button onclick="startGameFromOverlay()">Play Again</button>
     </div>
   </div>
-
-<audio id="dropSound" src="" preload="auto"></audio>
-<audio id="lockSound" src="lock.mp3" preload="auto"></audio>
-<audio id="moveSound" src="sounds/move.wav" preload="auto"></audio>
-<audio id="rotateSound" src="sounds/rotate.wav" preload="auto"></audio>
-<audio id="explodeSound" src="sounds/clear.wav" preload="auto"></audio>
-<audio id="gameOverSound" src="sounds/gameover.wav" preload="auto"></audio>
+  <audio id="dropSound" src="" preload="auto"></audio>
+  <audio id="lockSound" src="lock.mp3" preload="auto"></audio>
+  <audio id="moveSound" src="sounds/move.wav" preload="auto"></audio>
+  <audio id="rotateSound" src="sounds/rotate.wav" preload="auto"></audio>
+  <audio id="explodeSound" src="sounds/clear.wav" preload="auto"></audio>
+  <audio id="gameOverSound" src="sounds/gameover.wav" preload="auto"></audio>
   <audio id="bgm" src="sounds/black.mp3" preload="auto" loop></audio>
-
   <script>
 const moveSound = document.getElementById('moveSound');
 const rotateSound = document.getElementById('rotateSound');
@@ -266,6 +256,7 @@ const shapes = [
 
 let nextShape = [];
 let score = 0;
+let level = 1; // เพิ่มตัวแปร level
 
 function draw() {
   board.flat().forEach(cell => {
@@ -355,6 +346,12 @@ function clearLines() {
 
     score += linesToClear.length * 10;
     scoreDisplay.textContent = score;
+
+    // เพิ่มเลเวลและความเร็ว
+    if (linesToClear.length > 0) {
+      level += linesToClear.length;
+      document.getElementById('level').textContent = level;
+    }
     if (speed > 100) {
       speed -= linesToClear.length * 10;
       clearInterval(interval);
@@ -489,8 +486,10 @@ function startGame() {
   createBoard();
   createNextBoard();
   score = 0;
-  speed = 500;
+  level = 1; // รีเซ็ตเลเวล
   scoreDisplay.textContent = score;
+  document.getElementById('level').textContent = level; // รีเซ็ตแสดงเลเวล
+  speed = 500;
   nextShape = shapes[Math.floor(Math.random() * shapes.length)];
   spawn();
   interval = setInterval(drop, speed);
@@ -556,8 +555,10 @@ function getTetClass(shape) {
   return 'tet-t';
 }
 
+// ป้องกันการ scroll หน้าจอขณะเล่นบนมือถือ
 document.addEventListener('keydown', e => {
   if (!gameRunning) return;
+  if (['ArrowLeft','ArrowRight','ArrowDown','ArrowUp'].includes(e.key)) e.preventDefault();
   if (e.key === 'ArrowLeft') moveLeft();
   if (e.key === 'ArrowRight') moveRight();
   if (e.key === 'ArrowDown') drop();

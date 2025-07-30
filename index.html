@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>Brick Tetris</title>
   <style>
     .cell {
@@ -152,6 +152,9 @@
     .cell.tet-j { background: #3b6cff !important; }
     .cell.tet-s { background: #66ff66 !important; }
     .cell.tet-z { background: #ff6666 !important; }
+    .btn, .btn-sound {
+  touch-action: manipulation;
+}
   </style>
 </head>
 <body>
@@ -585,6 +588,13 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowRight') moveRight();
   if (e.key === 'ArrowDown') drop();
   if (e.key === 'ArrowUp') rotate();
+});
+
+// ป้องกัน double-tap zoom บน iOS
+document.querySelectorAll('.btn, .btn-sound').forEach(btn => {
+  btn.addEventListener('touchstart', function(e) {
+    if (e.touches.length > 1) e.preventDefault();
+  }, {passive: false});
 });
   </script>
 </body>

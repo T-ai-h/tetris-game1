@@ -590,12 +590,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowUp') rotate();
 });
 
-// ป้องกัน double-tap zoom บน iOS
-document.querySelectorAll('.btn, .btn-sound').forEach(btn => {
-  btn.addEventListener('touchstart', function(e) {
-    if (e.touches.length > 1) e.preventDefault();
-  }, {passive: false});
-});
+
   </script>
 </body>
 </html>
